@@ -1,102 +1,133 @@
 <template>
   <q-layout view="lHh Lpr lFf">
-    <q-header elevated>
-      <q-toolbar>
-        <q-btn
-          flat
-          dense
-          round
-          icon="menu"
-          aria-label="Menu"
-          @click="toggleLeftDrawer"
-        />
+    <MainHeader @menu-click="toggleDrawer" @right-drawer-toggle="toggleRightDrawer" />
 
-        <q-toolbar-title>
-          Quasar App
-        </q-toolbar-title>
+    <Sidebar 
+      :expanded="leftDrawerOpen"
+      :leftDrawerWidth="leftDrawerWidth"
+    />
 
-        <div>Quasar v{{ $q.version }}</div>
-      </q-toolbar>
-    </q-header>
-
-    <q-drawer
-      v-model="leftDrawerOpen"
-      show-if-above
-      bordered
-    >
-      <q-list>
-        <q-item-label
-          header
+    <q-page-container class="splitter-container">
+      <div class="main-content-row">
+        <div
+          v-if="isAssetsExplorerActivated"
+          class="bg-grey-2"
+          style="width: 250px; border-right: 1px solid #ccc;"
         >
-          Essential Links
-        </q-item-label>
+          <ToolboxListPane />
+        </div>
+        <div class="flex-1">
+          <q-splitter
+            v-if="isPropertyGridActivated"
+            v-model="splitterModel"
+            :limits="[200, 600]"
+            unit="px"
+            reverse
+          >
+            <!-- Left Main Content -->
+            <template v-slot:before>
+              <div class="splitter-pane left-content">
+                <!-- <div class="router-scroll"> -->
+                  <router-view />
+                <!-- </div> -->
+              </div>
+            </template>
 
-        <EssentialLink
-          v-for="link in linksList"
-          :key="link.title"
-          v-bind="link"
-        />
-      </q-list>
-    </q-drawer>
-
-    <q-page-container>
-      <router-view />
+            <!-- Right Property Grid -->
+            <template v-slot:after>
+              <div class="splitter-pane property-grid-panel bg-white">
+                <CustomPropertyGrid />
+              </div>
+            </template>
+          </q-splitter>
+          <div 
+          class="splitter-pane left-content"
+          v-else>
+              <router-view />
+          </div>
+        </div>
+      </div>
     </q-page-container>
   </q-layout>
 </template>
 
 <script setup>
-import { ref } from 'vue'
-import EssentialLink from 'components/EssentialLink.vue'
+import { ref, reactive, computed } from 'vue'
+import { usePropertyGridStore } from 'src/store/modules/propertyGridStore';
+import MainHeader from 'components/headers/MainHeader.vue'
+import Sidebar from 'components/drawers/Sidebar.vue'
+import CustomPropertyGrid from 'components/properties_grid/CustomPropertyGrid.vue'
+import  ToolboxListPane from 'components/explorers/ToolboxListPane.vue'
+import { useAssetsExplorerStore } from 'src/store/modules/assetsExplorerStore';
 
-const linksList = [
-  {
-    title: 'Docs',
-    caption: 'quasar.dev',
-    icon: 'school',
-    link: 'https://quasar.dev'
-  },
-  {
-    title: 'Github',
-    caption: 'github.com/quasarframework',
-    icon: 'code',
-    link: 'https://github.com/quasarframework'
-  },
-  {
-    title: 'Discord Chat Channel',
-    caption: 'chat.quasar.dev',
-    icon: 'chat',
-    link: 'https://chat.quasar.dev'
-  },
-  {
-    title: 'Forum',
-    caption: 'forum.quasar.dev',
-    icon: 'record_voice_over',
-    link: 'https://forum.quasar.dev'
-  },
-  {
-    title: 'Twitter',
-    caption: '@quasarframework',
-    icon: 'rss_feed',
-    link: 'https://twitter.quasar.dev'
-  },
-  {
-    title: 'Facebook',
-    caption: '@QuasarFramework',
-    icon: 'public',
-    link: 'https://facebook.quasar.dev'
-  },
-  {
-    title: 'Quasar Awesome',
-    caption: 'Community Quasar projects',
-    icon: 'favorite',
-    link: 'https://awesome.quasar.dev'
-  }
-]
+const leftDrawerOpen = ref(true)
+const leftDrawerWidth = ref(120)
+const splitterModel = ref(350)
+const propertyGridStore = usePropertyGridStore();
+const assetsExplorerStore = useAssetsExplorerStore();
 
-const leftDrawerOpen = ref(false)
+const isPropertyGridActivated = computed(() => propertyGridStore.isPropertyGridActivated)
+const isAssetsExplorerActivated = computed(() => assetsExplorerStore.isAssetsExplorerActivated)
 
-function toggleLeftDrawer () {
+function toggleDrawer() {
   leftDrawerOpen.value = !leftDrawerOpen.value
+  leftDrawerWidth.value = leftDrawerOpen.value ? 120 : 40
 }
+
+function toggleRightDrawer() {
+  assetsExplorerStore.toggleIsAssetsExplorerActivated();
+}
+
 </script>
+
+<style scoped>
+.splitter-container {
+  height: 100%;
+  overflow: hidden; /* prevent parent scroll */
+}
+
+.q-page-container {
+  height: 100%;
+  overflow: hidden; /* prevent container scroll */
+}
+
+.q-splitter {
+  height: 100%;
+}
+
+.splitter-pane {
+  height: 100%;
+  overflow-y: auto; /* independent scroll */
+}
+
+.left-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.router-scroll {
+  flex: 1;
+  overflow-y: auto; /* this makes router-view content scroll independently */
+}
+
+
+.property-grid-panel {
+  flex: 1;
+  border-left: 1px solid #ccc;
+  display: flex;
+  flex-direction: column;
+  overscroll-behavior: contain; /* stops scroll chaining */
+}
+
+.main-content-row {
+  display: flex;
+  height: 100%;
+}
+
+.main-content-row > .flex-1 {
+  flex: 1;
+  min-width: 0; /* important so splitter works inside flex */
+}
+
+</style>

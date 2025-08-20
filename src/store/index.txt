@@ -1,0 +1,76 @@
+// import { createStore } from 'vuex';
+// import example from './modules/example';
+
+// const store = createStore({
+//   modules: {
+//     example,
+//   },
+// });
+
+// export default store;
+
+import Vue from 'vue'
+import Vuex from 'vuex'
+
+import authStore from './modules/drilling/authStore'
+import datumStore from './modules/drilling/datumStore'
+import wellPathStore from './modules/drilling/wellPathStore'
+import tubingStringStore from './modules/drilling/tubingStringStore'
+import fluidsStore from './modules/drilling/fluidsStore'
+import subSurfaceStore from './modules/drilling/subSurfaceStore'
+import settingsStore from './modules/drilling/settingsStore'
+import wellDesignStore from './modules/drilling/wellDesignStore'
+import dataImportStore from './modules/drilling/dataImportStore'
+import holeStore from './modules/drilling/holeStore'
+import operationsStore from './modules/drilling/operationsStore'
+import simulationStore from './modules/drilling/simulationStore'
+import dataVisualizationStore from './modules/drilling/dataVisualizationStore'
+import companyStore from './modules/drilling/companyStore'
+import userStore from './modules/drilling/userStore'
+import chartStore from './modules/drilling/chartStore'
+import propertyGridStore from './modules/drilling/propertyGridStore'
+import rigStore from './modules/drilling/rigStore'
+import catalogStore from './modules/drilling/catalogStore'
+
+Vue.use(Vuex)
+
+/*
+ * If not building with SSR mode, you can
+ * directly export the Store instantiation;
+ *
+ * The function below can be async too; either use
+ * async/await or return a Promise which resolves
+ * with the Store instance.
+ */
+
+export default function (/* { ssrContext } */) {
+  const Store = new Vuex.Store({
+    modules: {
+      authStore,
+      datumStore,
+      wellPathStore,
+      tubingStringStore,
+      fluidsStore,
+      subSurfaceStore,
+      settingsStore,
+      wellDesignStore,
+      dataImportStore,
+      holeStore,
+      operationsStore,
+      simulationStore,
+      dataVisualizationStore,
+      companyStore,
+      userStore,
+      chartStore,
+      propertyGridStore,
+      rigStore,
+      catalogStore
+    },
+
+    // enable strict mode (adds overhead!)
+    // for dev mode only
+    strict: process.env.DEV
+  })
+
+  return Store
+}
