@@ -7,9 +7,9 @@ const get = async (payload) => {
   $http.defaults.headers.common['Authorization'] = 'Bearer ' + token;
   let config = {
     headers: {
-      tenantcode: payload.companyName,
+      //tenantcode: payload.companyName,
     },
-    useCredentails: true
+    //useCredentails: true
   }
 
   return new Promise((resolve, reject) => {
@@ -46,7 +46,11 @@ const remove = async (payload) => {
 const post = (payload) => {
 
   var token = validateSession();
-  $http.defaults.headers.common['Authorization'] = 'Bearer ' + token;
+  //$http.defaults.headers.common['Authorization'] = 'Bearer ' + token;
+
+  console.log($http)
+  console.log(payload.url)
+  console.log(payload.req)
 
   return new Promise((resolve, reject) => {
       

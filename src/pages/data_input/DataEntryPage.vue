@@ -58,7 +58,7 @@ const propertyGridStore = usePropertyGridStore();
 const tabData = reactive({
         'Production History': [
           { title: 'Production History', description: 'Enter production history', image: DailyOilProductionImage, route: "/" },
-          { title: 'Well Test Data', description: 'Enter well test data', image: DailyOilProductionImage, route: "/" },
+          { title: 'Well Test Data', description: 'Enter well test data', image: DailyOilProductionImage, route: '/import-welltest-data' },
         ],
         Reservoir: [
           { title: 'BHP Data', description: 'Enter bottom hole pressure data', image: DailyOilProductionImage, route: "/" },

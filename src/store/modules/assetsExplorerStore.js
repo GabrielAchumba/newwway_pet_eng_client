@@ -12,6 +12,7 @@ export const useAssetsExplorerStore = defineStore('assetsExplorerStore', {
   actions: {
     setStateData(variableName, variableValue) {
       this[variableName] = variableValue;
+      //console.log(variableName, this[variableName])
     },
 
     SetIsAssetsExplorerActivated(payload) {

@@ -47,12 +47,15 @@ import { useAuthStore } from 'src/store/modules/authStore';
 import { subSurfaceAssetsHeaders, dialogsWellsImport } from "./view_models/import_subsurface_assets_vm";
 import { usePropertyGridStore } from 'src/store/modules/propertyGridStore';
 import { useAssetsExplorerStore } from 'src/store/modules/assetsExplorerStore';
+import { useAssetGroupsStore } from 'src/store/modules/assetGroupsStore';
 import { useRouter } from 'vue-router'
+import { fetchAssets, createAssets } from "src/api_services/assets_service";
 
 const authStore = useAuthStore();
 const router = useRouter();
 const propertyGridStore = usePropertyGridStore();
 const assetsExplorerStore = useAssetsExplorerStore();
+const assetGroupsStore = useAssetGroupsStore();
 
 
 export default {
@@ -65,6 +68,12 @@ export default {
         },
         spinnerThickness(){
             return authStore.spinnerThickness;
+        },
+        assetGroups(){
+            return assetGroupsStore.assetGroups;
+        },
+        selectedAssetGroup(){
+            return assetGroupsStore.selectedAssetGroup;
         }
     },
     components:{
@@ -80,34 +89,64 @@ export default {
             tableRows: [],
             isImportComplete: false,
             productionHistoryCollection: [],
+            payload: {
+                wells: [],
+                reservoirs: [],
+                fields: [],
+                productionStrings: [],
+                wellProductionStrings: []
+            }
         }
     },
     methods:{
         Create(tableRows){
             const context = this;
             context.tableRows = tableRows;
-            console.log("context.tableRows: ", context.tableRows)
 
-            //to be removed
+            console.log(context.assetGroups);
+            console.log(context.selectedAssetGroup);
 
-            //{ label: 'Item 1', checked: false }
-            const columnName = WellsHeaders[0].name;
-            assetsExplorerStore.setStateData("listItems", tableRows.map((row) => {
-                return { label: row[columnName], checked: false }
-            })); 
+            const selectedAssetGroup = context.assetGroups.find(assetGroup => assetGroup.name = context.selectedAssetGroup.assetGroupName);
+            
+            context.payload.AssetGroupId = selectedAssetGroup.id;
+
+            for(const row of tableRows){
+                if(row["Field"]) context.payload.fields.push({name: row["Field"], description: row["Field"]});
+                if(row["Reservoir"]) context.payload.reservoirs.push({name: row["Reservoir"], description: row["Reservoir"]});
+                if(row["Well"]) context.payload.wells.push({ name: row["Well"], description: row["Well"]});
+                if(row["String"]) context.payload.productionStrings.push({name: row["String"], description: row["String"]});
+                if(row["WellString"]) context.payload.wellProductionStrings.push({name: row["WellString"], description: row["WellString"]});
+            }
+
+            var i = -1;
+            for(const dialog of context.dialogs){
+                i++;
+                if(dialog.title == "Import Subsurface Asset Names"){
+                    context.dialogs[i].isVisible = true;
+                    break;
+                }
+            }
+
+            //let unique = x.filter((item, index) => x.indexOf(item) === index);
+
+            // context.payload.fields =  context.payload.fields.filter((item, index) => context.payload.fields.indexOf(item) === index);
+            // context.payload.reservoirs =  context.payload.reservoirs.filter((item, index) => context.payload.reservoirs.indexOf(item) === index);
+            // context.payload.wells =  context.payload.wells.filter((item, index) => context.payload.wells.indexOf(item) === index);
+            // context.payload.productionStrings =  context.payload.productionStrings.filter((item, index) => context.payload.productionStrings.indexOf(item) === index);
+            // context.payload.wellProductionStrings =  context.payload.wellProductionStrings.filter((item, index) => context.payload.wellProductionStrings.indexOf(item) === index);
+
+
+
+            // console.log("context.tableRows: ", context.tableRows)
+            // console.log("context.payload: ", context.payload);
+
+            
+
 
             //router.push('/drilling-well-schematics')
-            this.$router.push('/drilling-well-schematics')
+            //this.$router.push('/drilling-well-schematics')
 
-            //TO BE UNCOMMENTED = VERY USEFUL
-            // var i = -1;
-            // for(const dialog of context.dialogs){
-            //     i++;
-            //     if(dialog.title == "Import Well Names"){
-            //         context.dialogs[i].isVisible = true;
-            //         break;
-            //     }
-            // }
+            
         },
         Cancel(){
 
@@ -145,17 +184,20 @@ export default {
             }
             console.log("context.applicationColumns: ", context.applicationColumns)
         },
-        createProductionNetwork(){
+        async storeAssets() {
             var context = this;
-            context.productionHistoryCollection = [];
-            for(const row of context.tableRows) {
-                const newRow = {}
-                for (const appVariable of context.appVariables){
-                   newRow[`${appVariable.name}`] = row[`${appVariable.title}`];
-                }
-            }
+            //context.productionHistoryCollection = [];
+            // for(const row of context.tableRows) {
+            //     const newRow = {}
+            //     for (const appVariable of context.appVariables){
+            //        newRow[`${appVariable.name}`] = row[`${appVariable.title}`];
+            //     }
+            // }
 
-            this.$emit("doneImportAction", context.productionHistoryCollection);
+            //this.$emit("doneImportAction", context.productionHistoryCollection);
+
+            console.log("context.payload: ", context.payload);
+            await createAssets(context.payload)
             context.dialogs[0].isVisible = false;
             context.dialogs[1].isVisible = true;
             context.isImportComplete = true;
@@ -174,7 +216,7 @@ export default {
                 if(dialog.title === payload){
                     switch(payload){
                         case "Import Subsurface Asset Names":
-                            context.createProductionNetwork();
+                            context.storeAssets();
                             context.dialogs[i].isVisible = false;
                             break;
                         case "Success":
@@ -185,9 +227,18 @@ export default {
                     break;
                 }
             }
+        },
+        async getAssets() {
+            const assets = await fetchAssets();
+            console.log("assets: ", assets);
+            // assetsExplorerStore.setStateData("listItems", assetGroups.map((row=>({
+            // ...row,
+            // label: row.name,
+            // checked: false
+            // }))));
         }
     },
-    created(){
+    async created() {
         var context = this;
         context.isImportComplete = false;
         authStore.setStateData("showSpinner", false);
@@ -197,6 +248,7 @@ export default {
         authStore.setStateData("pageTitle", "Import Well Names"); 
         propertyGridStore.SetIsPropertyGridActivated(false);
         assetsExplorerStore.SetIsAssetsExplorerActivated(true);
+        await context.getAssets();
     }
 }
 </script>

@@ -52,19 +52,22 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed } from 'vue'
+import { ref, reactive, computed, onMounted } from 'vue'
 import { usePropertyGridStore } from 'src/store/modules/propertyGridStore';
 import MainHeader from 'components/headers/MainHeader.vue'
 import Sidebar from 'components/drawers/Sidebar.vue'
 import CustomPropertyGrid from 'components/properties_grid/CustomPropertyGrid.vue'
 import  ToolboxListPane from 'components/explorers/ToolboxListPane.vue'
 import { useAssetsExplorerStore } from 'src/store/modules/assetsExplorerStore';
+import { useAssetGroupsStore } from 'src/store/modules/assetGroupsStore';
+import { fetchAssetGroups } from 'src/api_services/asset_groups';
 
 const leftDrawerOpen = ref(true)
 const leftDrawerWidth = ref(120)
 const splitterModel = ref(350)
 const propertyGridStore = usePropertyGridStore();
 const assetsExplorerStore = useAssetsExplorerStore();
+const assetGroupsStore = useAssetGroupsStore();
 
 const isPropertyGridActivated = computed(() => propertyGridStore.isPropertyGridActivated)
 const isAssetsExplorerActivated = computed(() => assetsExplorerStore.isAssetsExplorerActivated)
@@ -77,6 +80,26 @@ function toggleDrawer() {
 function toggleRightDrawer() {
   assetsExplorerStore.toggleIsAssetsExplorerActivated();
 }
+
+const getAssetGroups = async () => {
+
+    const assetGroups = await fetchAssetGroups();
+    console.log(assetGroups)
+    assetGroupsStore.setStateData("assetGroups", assetGroups);
+    assetsExplorerStore.setStateData("listItems", assetGroups.map((row=>({
+    ...row,
+    label: row.name,
+    checked: false
+    }))));
+
+
+  }
+
+  onMounted(async ()  => {
+
+      await getAssetGroups();
+
+  })
 
 </script>
 
