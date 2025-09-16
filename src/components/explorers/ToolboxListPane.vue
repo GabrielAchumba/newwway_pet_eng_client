@@ -17,7 +17,7 @@
     <!-- Listbox -->
     <div class="listbox">
       <q-list bordered separator>
-        <q-item v-for="(item, index) in items" 
+        <q-item v-for="(item, index) in listItems" 
         :key="index" 
         clickable
         @click="selectItem(index)"
@@ -36,7 +36,8 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { storeToRefs } from 'pinia';
+import { ref, computed, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAssetsExplorerStore } from 'src/store/modules/assetsExplorerStore';
 import { useAssetGroupsStore } from 'src/store/modules/assetGroupsStore';
@@ -45,9 +46,12 @@ const assetsExplorerStore = useAssetsExplorerStore();
 const assetGroupsStore = useAssetGroupsStore();
 const router = useRouter();
 
-const assetExplorerTitle = computed(() => assetsExplorerStore.assetExplorerTitle);
-const items = computed(() => assetsExplorerStore.listItems);
-const isCheckBoxActive = computed(() => assetsExplorerStore.isCheckBoxActive);
+//const assetExplorerTitle = computed(() => assetsExplorerStore.assetExplorerTitle);
+//const items = computed(() => assetsExplorerStore.listItems);
+//console.log(items)
+//const isCheckBoxActive = computed(() => assetsExplorerStore.isCheckBoxActive);
+
+const { listItems, assetExplorerTitle, isCheckBoxActive } = storeToRefs(assetsExplorerStore);
 
 
 const selectedIndex = ref(null)
@@ -60,15 +64,24 @@ function selectItem(index) {
     case '/asset-groups':
 
       assetGroupsStore.setStateData("selectedAssetGroup", {
-        assetGroupName: items.value[index].label,
-        assetGroupDescription: items.value[index].description
+        assetGroupName: listItems.value[index].label,
+        assetGroupDescription: listItems.value[index].description
       });
       break;
   }
 }
 
 function onAdd() {
-  items.value.push({ label: `Item ${items.value.length + 1}`, checked: false })
+  
+  switch(router.currentRoute._value.fullPath){
+    case '/asset-groups':
+
+      assetGroupsStore.setStateData("selectedAssetGroup", {
+        assetGroupName: "",
+        assetGroupDescription: ""
+      });
+      break;
+  }
 }
 
 function onImport() {
@@ -77,8 +90,12 @@ function onImport() {
 }
 
 function onDelete() {
-  items.value = items.value.filter(item => !item.checked)
+  //items.value = items.value.filter(item => !item.checked)
 }
+
+watch(listItems, (val) => {
+  console.log('listItems changed:', val)
+}, { immediate: true })
 </script>
 
 <style scoped>

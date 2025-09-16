@@ -1,7 +1,7 @@
 <template>
-  <div class="row items-center q-pa-md bg-primary" style="height: 40px;" :class="{'toolbox-shadow': shadow}">
-    <div class="row q-gutter-sm">
-      <q-btn
+  <div class="row items-center q-pa-sm bg-primary" style="height: 40px;" :class="{'toolbox-shadow': shadow}">
+    <div class="row">
+      <!-- <q-btn
         v-for="(button, index) in buttons"
         :key="index"
         dense
@@ -10,10 +10,24 @@
         :icon="button.icon"
         :class="button.class || 'text-secondary'"
         @click="button.handler"
-        size="sm"
       >
         <q-tooltip>{{ button.tooltip }}</q-tooltip>
-      </q-btn>
+      </q-btn> -->
+
+      <q-btn
+        v-for="(button, index) in buttons"
+        :key="index"
+        dense
+        flat
+        round
+        :icon="button.icon"
+        :class="[button.class || 'text-secondary', 'mx-btn']"
+        @click="button.handler"
+      >
+        <q-tooltip>{{ button.tooltip }}</q-tooltip>
+    </q-btn>
+
+
     </div>
   </div>
 </template>
@@ -56,5 +70,9 @@ export default {
 .toolbox-shadow:hover {
   box-shadow: 0 4px 6px -1px rgba(10, 29, 63, 0.1), 
               0 2px 4px -1px rgba(10, 29, 63, 0.1);
+}
+
+.mx-btn {
+  margin: 0 8px; /* adjust spacing as needed */
 }
 </style>

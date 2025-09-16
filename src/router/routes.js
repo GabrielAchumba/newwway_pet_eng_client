@@ -21,6 +21,8 @@ const routes = [
       { path: '/dca-run-prediction', component: () => import('src/pages/decline_curve_analysis/dca_run_prediction.vue')},
       { path: '/dca-simulation-chart', component: () => import('src/pages/decline_curve_analysis/dca_simulation_chart.vue')},
       { path: '/asset-groups', component: () => import('src/pages/asset_groups/landing.vue')},
+      { path: '/import-welltest-data', component: () => import('src/pages/data_import/well_test_history/import_welltest_data.vue')},
+      //import_welltest_data
     ]
   },
 

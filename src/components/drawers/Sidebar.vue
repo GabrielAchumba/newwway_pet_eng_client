@@ -21,6 +21,7 @@
             v-ripple
             class="menu-item column items-center q-my-sm"
             @click="navigateTo(item.route)"
+            :disable="false"
           >
             <q-icon
               :name="item.icon"

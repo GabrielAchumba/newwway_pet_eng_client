@@ -1,6 +1,6 @@
 import { defineBoot } from '#q-app/wrappers'
 import axios from 'axios'
-const processEnvNOEENV = "production";
+const processEnvNOEENV = "dev";
 
 // Be careful when using SSR for cross-request state pollution
 // due to creating a Singleton instance here;
@@ -9,7 +9,7 @@ const processEnvNOEENV = "production";
 // "export default () => {}" function below (which runs individually
 // for each client)
 const  $http = axios.create({  
-  baseURL: (processEnvNOEENV == 'production') ? 'https://tdragapi-bwo8s.ondigitalocean.app/' : 'http://localhost:4000/',
+  baseURL: (processEnvNOEENV == 'production') ? 'https://tdragapi-bwo8s.ondigitalocean.app/' : 'http://localhost:8000/',
   headers: {
     'Content-Type': 'application/json',
     //"Access-Control-Allow-Methods":"GET,PUT,POST,DELETE,PATCH,OPTIONS",
