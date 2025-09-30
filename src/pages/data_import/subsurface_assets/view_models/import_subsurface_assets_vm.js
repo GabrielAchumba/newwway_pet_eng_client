@@ -1,9 +1,11 @@
 export const subSurfaceAssetsHeaders = [
+    {name2: "Facility", name: "Facility", title: "Facility"},
     {name2: "Field", name: "Field", title: "Field"},
     {name2: "Reservoir", name: "Reservoir", title: "Reservoir"},
     {name2: "Well", name: "Well", title: "Well"},
     {name2: "String", name: "String", title: "String"},
     {name2: "WellString", name: "WellString", title: "WellString"},
+    {name2: "DrainagePoint", name: "DrainagePoint", title: "Drainage Point"},
 ]
 
 export const dialogsWellsImport = [

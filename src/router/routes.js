@@ -12,7 +12,7 @@ const routes = [
       { path: '/import-well-names', component: () => import('src/pages/data_import/subsurface_assets/import_subsurface_assets.vue')},
       { path: '/assets-landing', component: () => import('src/pages/assets/landing.vue')},
       { path: '/import-subsurface-assets', component: () => import('src/pages/data_import/subsurface_assets/import_subsurface_assets.vue')},
-      { path: '/subsurface-assets-landing', component: () => import('src/pages/visualization/DrillingWellSchematics.vue')},
+      { path: '/subsurface-assets-landing', component: () => import('src/pages/visualization/network_diagram.vue')},
       { path: '/drilling-well-schematics', component: () => import('src/pages/visualization/DrillingWellSchematics.vue')},
       { path: '/dca-landing', component: () => import('src/pages/decline_curve_analysis/landing.vue')},
       { path: '/dca-options', component: () => import('src/pages/decline_curve_analysis/dca_options.vue')},
@@ -22,7 +22,9 @@ const routes = [
       { path: '/dca-simulation-chart', component: () => import('src/pages/decline_curve_analysis/dca_simulation_chart.vue')},
       { path: '/asset-groups', component: () => import('src/pages/asset_groups/landing.vue')},
       { path: '/import-welltest-data', component: () => import('src/pages/data_import/well_test_history/import_welltest_data.vue')},
-      //import_welltest_data
+      { path: '/network-diagram', component: () => import('src/pages/visualization/network_diagram.vue')},
+      { path: '/well-lift-curves-landing', component: () => import('src/pages/data_input/well_modeling/well_lift_curves_landing.vue')},
+      { path: '/lift-curves-import', component: () => import('src/pages/data_import/well_modeling/lift_curves_import.vue')},
     ]
   },
 

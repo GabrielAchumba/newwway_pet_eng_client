@@ -3,10 +3,6 @@
     <div class="q-pa-sm read-worksheet-card">
       <span v-if="qSelect.visible">
         <div class="row items-center q-col-gutter-md">
-          <!-- Label -->
-          <div class="col-12 col-md-4">
-            <p class="q-ma-sm label-text">{{ qSelect.label }}</p>
-          </div>
 
           <!-- File Upload -->
           <div class="col-12 col-md-3">
@@ -21,8 +17,29 @@
             </label>
           </div>
 
+          <div class="col-12 col-md-3">
+            <!-- <input
+                type="text"
+                @change="onExcelDataStartRowChanged"
+              /> -->
+
+            <q-input
+                v-model="excelDataStartRow"
+                filled
+                label="Data Start Row"
+                type="text"
+                stack-label
+              />
+          </div>
+
+          <!-- Label -->
+          <div class="col-12 col-md-2">
+            <p class="q-ma-sm label-text">{{ qSelect.label }}</p>
+          </div>
+
+
           <!-- Select -->
-          <div class="col-12 col-md-5">
+          <div class="col-12 col-md-4">
             <NSelect
               :qSelect="qSelect"
               @onQSelectItemValueChanged="onQSelectItemValueChanged($event)"
@@ -48,6 +65,11 @@ export default {
       default: () => ({})
     }
   },
+  data(){
+    return {
+      excelDataStartRow: 0,
+    }
+  },
   methods: {
     onQSelectItemValueChanged(_qSelect) {
       this.$emit("onQSelectItemValueChanged", _qSelect);
@@ -56,6 +78,14 @@ export default {
       const files = event.target.files;
       const selectedFile = files[0];
       this.$emit("onFileSelected", { selectedFile });
+    },
+    // onExcelDataStartRowChanged(value) {
+    //   this.$emit("onExcelDataStartRowChanged", value);
+    // },
+  },
+  watch: {
+    excelDataStartRow(val) {
+      this.$emit("onExcelDataStartRowChanged", val);
     }
   }
 };

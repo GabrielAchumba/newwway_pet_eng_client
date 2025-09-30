@@ -39,6 +39,7 @@
               @onToggle="onToggle($event)"
               @onFileSelected="onFileSelected($event)"
               @onQSelectItemValueChanged="onWorksheetChanged($event)"
+              @onExcelDataStartRowChanged="onExcelDataStartRowChanged($event)"
             />
           </q-form>
         </q-card-section>
@@ -113,7 +114,7 @@ import { form } from "./excel-import-main-vm";
 import { importMethodForm, dialogs } from "./import-method-view-model";
 import ReadWorksheet from "./read-worksheet.vue";
 import MapVariables from "./mapVariablesNew.vue";
-import Table from "../../Tables/Table.vue";
+import Table from "../../tables/Table.vue";
 
 const authStore = useAuthStore();
 
@@ -167,6 +168,7 @@ export default {
         return {
             mathExpression: "$$2^x.$$", // `$$x = {-b \\pm \\sqrt{b^2-4ac} \\over 2a}.$$`,
             num: 16,
+            msExcelDataStartRow: 0,
             applicationColumns:[{
                     isToggle: true,
                 qToggle: { name: true, label: ""}
@@ -198,6 +200,11 @@ export default {
         }
     },
     methods:{
+        onExcelDataStartRowChanged(payload){
+            var context = this;
+            console.log(payload)
+            context.msExcelDataStartRow = payload;
+        },
         onWorksheetChanged(qSelect){
             var context = this;
             context.setWorkSheetColumns(qSelect.value.sheetData);
@@ -252,7 +259,9 @@ export default {
             context.tableVM.rows = [];
             console.log("context.selectedWorkSheetData: ", context.selectedWorkSheetData)
             console.log("context.tableVM.columnsOriginal: ", context.tableVM.columnsOriginal)
+            let ii = -1;
             for(const selectedWorkSheetRow of context.selectedWorkSheetData){
+                ii++;
                 const tableRow = context.setTableRow(selectedWorkSheetRow);
                 let newRow = {};
                 for(const column of context.tableVM.columnsOriginal){
@@ -260,7 +269,10 @@ export default {
                         newRow[column.name] = tableRow[column.name]
                     }
                 }
-                context.tableVM.rows.push({...newRow});
+                if(ii >= context.msExcelDataStartRow -1){
+                    context.tableVM.rows.push({...newRow});
+                }
+                
             }
 
             console.log("context.tableVM.rows: ", context.tableVM.rows)

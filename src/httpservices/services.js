@@ -2,9 +2,9 @@ import { $http } from 'src/boot/axios';
 
 const get = async (payload) => {
 
-  console.log("get called")
-  var token = validateSession();
-  $http.defaults.headers.common['Authorization'] = 'Bearer ' + token;
+  console.log(payload)
+  //var token = validateSession();
+  //$http.defaults.headers.common['Authorization'] = 'Bearer ' + token;
   let config = {
     headers: {
       //tenantcode: payload.companyName,
@@ -15,12 +15,14 @@ const get = async (payload) => {
   return new Promise((resolve, reject) => {
       
     $http.get(payload.url, config)
-     .then(response => {            
-         resolve(response)
+     .then(response => { 
+        console.log(response)           
+        resolve(response)
          
      })
      .catch(error => {
-       reject(error)
+        console.log(error)
+        reject(error)
      })
   })
 }
@@ -48,9 +50,9 @@ const post = (payload) => {
   var token = validateSession();
   //$http.defaults.headers.common['Authorization'] = 'Bearer ' + token;
 
-  console.log($http)
-  console.log(payload.url)
-  console.log(payload.req)
+  //console.log($http)
+  //console.log(payload.url)
+  //console.log(payload.req)
 
   return new Promise((resolve, reject) => {
       

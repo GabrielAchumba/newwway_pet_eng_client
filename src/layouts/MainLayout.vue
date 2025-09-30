@@ -81,25 +81,25 @@ function toggleRightDrawer() {
   assetsExplorerStore.toggleIsAssetsExplorerActivated();
 }
 
-const getAssetGroups = async () => {
+// const getAssetGroups = async () => {
 
-    const assetGroups = await fetchAssetGroups();
-    console.log(assetGroups)
-    assetGroupsStore.setStateData("assetGroups", assetGroups);
-    assetsExplorerStore.setStateData("listItems", assetGroups.map((row=>({
-    ...row,
-    label: row.name,
-    checked: false
-    }))));
+//     const assetGroups = await fetchAssetGroups();
+//     console.log(assetGroups)
+//     assetGroupsStore.setStateData("assetGroups", assetGroups);
+//     assetsExplorerStore.setStateData("listItems", assetGroups.map((row=>({
+//     ...row,
+//     label: row.name,
+//     checked: false
+//     }))));
 
 
-  }
+//   }
 
-  onMounted(async ()  => {
+  // onMounted(async ()  => {
 
-      await getAssetGroups();
+  //     await getAssetGroups();
 
-  })
+  // })
 
 </script>
 

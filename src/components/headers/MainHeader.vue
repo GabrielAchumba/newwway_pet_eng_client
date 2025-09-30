@@ -68,10 +68,15 @@
 import { ref, computed} from 'vue'
 import userImage from 'src/assets/images/user.JPG'
 import { useAssetsExplorerStore } from 'src/store/modules/assetsExplorerStore';
+import { useAssetGroupsStore } from 'src/store/modules/assetGroupsStore';
 
 const assetsExplorerStore = useAssetsExplorerStore();
+const assetGroupsStore = useAssetGroupsStore();
 
-const assetExplorerTitle = computed(() => assetsExplorerStore.assetExplorerTitle);
+const assetExplorerTitle = computed(() => {
+
+  return `${assetGroupsStore.selectedAssetGroup.assetGroupName} - ${assetsExplorerStore.assetExplorerTitle}`;
+});
 
 // Emit click event
 const emit = defineEmits(['menu-click', 'right-drawer-toggle'])

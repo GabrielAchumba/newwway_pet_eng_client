@@ -21,6 +21,7 @@
               :qSelect="qSelect"
               @onFileSelected="onFileSelected"
               @onQSelectItemValueChanged="onWorksheetChanged"
+              @onExcelDataStartRowChanged="onExcelDataStartRowChanged"
             />
           </div>
         </template>
@@ -119,6 +120,9 @@ export default {
     onWorksheetChanged(payload) {
         console.log("payload: ", payload)
       this.$emit("onQSelectItemValueChanged", payload);
+    },
+    onExcelDataStartRowChanged(payload){
+      this.$emit("onExcelDataStartRowChanged", payload);
     }
   },
   mounted() {

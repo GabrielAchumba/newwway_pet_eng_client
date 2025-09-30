@@ -51,16 +51,23 @@ import DailyOilProductionImage from 'assets/images/Oil.svg';
 import MonthlyProductionForecastImage from 'assets/images/QualityAssurance.svg';
 import EmissionsImage from 'assets/images/StoredDeck.svg';
 import { usePropertyGridStore } from 'src/store/modules/propertyGridStore';
+import { useAssetsExplorerStore } from 'src/store/modules/assetsExplorerStore';
 
 const router = useRouter();
 const propertyGridStore = usePropertyGridStore();
+const assetsExplorerStore = useAssetsExplorerStore();
 
 const tabData = reactive({
-        'Production History': [
+        'Production Data': [
           { title: 'Production History', description: 'Enter production history', image: DailyOilProductionImage, route: "/" },
           { title: 'Well Test Data', description: 'Enter well test data', image: DailyOilProductionImage, route: '/import-welltest-data' },
+          { title: 'External Business Forecast Deck', description: 'Enter external business forecast deck', image: DailyOilProductionImage, route: '/import-welltest-data' },
+          { title: 'Internally Generated Business Forecast Deck', description: 'Enter niernally generated business forecast deck', image: DailyOilProductionImage, route: '/import-welltest-data' },
+          { title: 'Forecast Profile from MBAL', description: 'Enter forecast profile from MBAL', image: DailyOilProductionImage, route: '/import-welltest-data' },
+          { title: 'Forecast Profile from ECLIPSE', description: 'Enter forecast profile from ECLIPSE', image: DailyOilProductionImage, route: '/import-welltest-data' },
+          { title: 'Forecast Profile from GAP', description: 'Enter forecast profile from GAP', image: DailyOilProductionImage, route: '/import-welltest-data' },
         ],
-        Reservoir: [
+        "Reservoir": [
           { title: 'BHP Data', description: 'Enter bottom hole pressure data', image: DailyOilProductionImage, route: "/" },
           { title: 'PVT Data', description: 'Enter reservoir fluid data', image: DailyOilProductionImage, route: "/" },
           { title: 'AVD Data', description: 'Enter area, volume, depth data', image: DailyOilProductionImage, route: "/" },
@@ -68,7 +75,7 @@ const tabData = reactive({
           { title: 'SCAL', description: 'Enter Relative Permeability, Saturation and capillary pressure of the reservoir', image: DailyOilProductionImage, route: "/" },
           { title: 'Petrophysics Data', description: 'Enter the porosity, absolute permeability and net to gross of the reservoir', image: DailyOilProductionImage, route: "/" },
         ],
-        Drilling: [
+        "Drilling": [
           { title: 'Create a Welll', description: 'Create a well with a unique name', image: DailyOilProductionImage, route: "/" },
           { title: 'Well Datum', description: 'Create datum for a given well', image: DailyOilProductionImage, route: "/well-datum-input" },
           { title: 'Survey Data', description: 'Create well deviation survey data', image: DailyOilProductionImage, route: "/" },
@@ -80,20 +87,22 @@ const tabData = reactive({
           { title: 'Subsurface', description: 'Enter subsurface data', image: DailyOilProductionImage, route: "/" },
         ],
         'Well Completion': [
+          { title: 'Lift Curves', description: 'View or import lift curves', image: DailyOilProductionImage, route: '/well-lift-curves-landing' },
           { title: 'Down Hole Equipemnts', description: 'Enter down hole equipments', image: DailyOilProductionImage, route: "/" },
           { title: 'Sand Control', description: 'Enter the sand control equipment data', image: DailyOilProductionImage, route: "/" },
           { title: 'Geothermal Gradient', description: 'Enter the geothermal  data of the formation', image: DailyOilProductionImage, route: "/" },
           { title: 'View Completed Well Schematic', description: 'Enter mud and mud temperature and pressure data', image: DailyOilProductionImage, route: "/" },
         ],
-        'Gathering Systems': [
-          { title: 'Down Hole Equipemnts', description: 'Enter down hole equipments', image: DailyOilProductionImage, route: "/" },
-          { title: 'Sand Control', description: 'Enter the sand control equipment data', image: DailyOilProductionImage, route: "/" },
-          { title: 'Geothermal Gradient', description: 'Enter the geothermal  data of the formation', image: DailyOilProductionImage, route: "/" },
-          { title: 'View Completed Well Schematic', description: 'Enter mud and mud temperature and pressure data', image: DailyOilProductionImage, route: "/" },
+        'Surface Systems Data': [
+          { title: 'Equipments Capacities', description: 'Enter equipments capacities', image: DailyOilProductionImage, route: "/" },
+          { title: 'Deferments', description: 'Enter facilities deferments', image: DailyOilProductionImage, route: "/" },
+          { title: 'Own Use Gas', description: 'Enter facilities own use gas', image: DailyOilProductionImage, route: "/" },
+          { title: 'Flared Gas', description: 'Enter facilities flared gas', image: DailyOilProductionImage, route: "/" },
+          { title: 'Crude Oil Losses', description: 'Enter facilities crude oil losses', image: DailyOilProductionImage, route: "/" },
         ],
       })
 
-const activeTab = ref('Reservoir')
+const activeTab = ref('Production Data')
 
 const tabNames = computed(() => Object.keys(tabData))
 const dataCards = computed(() => tabData[activeTab.value] || [])
@@ -108,6 +117,7 @@ function navigateTo(route) {
 
 onMounted(() => {
   propertyGridStore.SetIsPropertyGridActivated(false);
+  assetsExplorerStore.SetIsAssetsExplorerActivated(false);
 });
 </script>
 

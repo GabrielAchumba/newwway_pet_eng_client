@@ -82,7 +82,7 @@ export default {
     },
     data(){
         return {
-            title: "Import Subsurface Asset Names",
+            title: "Import Production History",
             appVariables: subSurfaceAssetsHeaders,
             applicationColumns: [],
             dialogs: dialogsWellsImport,
@@ -94,9 +94,7 @@ export default {
                 reservoirs: [],
                 fields: [],
                 productionStrings: [],
-                wellProductionStrings: [],
-                drainagePoints: [],
-                facilities: []
+                wellProductionStrings: []
             }
         }
     },
@@ -107,34 +105,23 @@ export default {
 
             console.log(context.assetGroups);
             console.log(context.selectedAssetGroup);
-             console.log(tableRows);
 
-             context.payload = {
-                wells: [],
-                reservoirs: [],
-                fields: [],
-                productionStrings: [],
-                wellProductionStrings: [],
-                drainagePoints: [],
-                facilities: []
-            };
+            const selectedAssetGroup = context.assetGroups.find(assetGroup => assetGroup.name = context.selectedAssetGroup.assetGroupName);
             
-            context.payload.AssetGroupId = assetGroupsStore.selectedAssetGroup.id;
+            context.payload.AssetGroupId = selectedAssetGroup.id;
 
             for(const row of tableRows){
-                if(row["Facility"]) context.payload.facilities.push({name: row["Facility"], description: row["Facility"]});
                 if(row["Field"]) context.payload.fields.push({name: row["Field"], description: row["Field"]});
                 if(row["Reservoir"]) context.payload.reservoirs.push({name: row["Reservoir"], description: row["Reservoir"]});
                 if(row["Well"]) context.payload.wells.push({ name: row["Well"], description: row["Well"]});
                 if(row["String"]) context.payload.productionStrings.push({name: row["String"], description: row["String"]});
                 if(row["WellString"]) context.payload.wellProductionStrings.push({name: row["WellString"], description: row["WellString"]});
-                if(row["Drainage Point"]) context.payload.drainagePoints.push({name: row["Drainage Point"], description: row["Drainage Point"]});
             }
 
             var i = -1;
             for(const dialog of context.dialogs){
                 i++;
-                if(dialog.title == "Import Subsurface Asset Names"){
+                if(dialog.title == "Import Production History"){
                     context.dialogs[i].isVisible = true;
                     break;
                 }
@@ -228,7 +215,7 @@ export default {
                 i++;
                 if(dialog.title === payload){
                     switch(payload){
-                        case "Import Subsurface Asset Names":
+                        case "Import Production History":
                             context.storeAssets();
                             context.dialogs[i].isVisible = false;
                             break;

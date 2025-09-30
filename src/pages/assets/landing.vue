@@ -56,6 +56,7 @@ function navigateTo(route) {
 onMounted(() => {
   propertyGridStore.SetIsPropertyGridActivated(false);
   assetsExplorerStore.SetIsAssetsExplorerActivated(false);
+  assetsExplorerStore.setIsAssetCategorySelector(true)
 });
 </script>
 

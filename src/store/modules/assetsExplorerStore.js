@@ -6,7 +6,10 @@ export const useAssetsExplorerStore = defineStore('assetsExplorerStore', {
     assetExplorerTitle: "",
     listItems: [],
     isCheckBoxActive: false,
-    selectedItem: {}
+    selectedItem: {},
+    isAssetCategorySelector: false,
+    networkNodes: [],
+    networkConnections: []
   }),
 
   actions: {
@@ -21,6 +24,10 @@ export const useAssetsExplorerStore = defineStore('assetsExplorerStore', {
 
     toggleIsAssetsExplorerActivated() {
         this.isAssetsExplorerActivated = !this.isAssetsExplorerActivated;
+    },
+
+    setIsAssetCategorySelector(payload) {
+        this.isAssetCategorySelector = payload;
     }
 
   }

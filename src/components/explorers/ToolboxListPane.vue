@@ -2,15 +2,31 @@
   <div class="toolbox-pane" style="scrollbar-width: none; height: 100vh;">
 
     <div class="row items-center justify-between q-pa-sm">
-        <!-- Title on the left -->
-        <!-- <div class="text-caption text-bold">{{ assetExplorerTitle }}</div> -->
-
         <!-- Toolbox on the right -->
         <div class="toolbox row items-center q-gutter-sm">
             <q-btn flat round icon="add" size="sm" @click="onAdd" />
             <q-btn flat round icon="upload" size="sm" @click="onImport" />
+            <q-btn flat round icon="share" size="sm" @click="onNetwork" />
             <q-btn flat round icon="delete" size="sm" color="negative" @click="onDelete" />
         </div>
+    </div>
+
+    <!-- Category Dropdown -->
+    <div class="q-pa-sm">
+      <q-select
+        v-if="isAssetCategorySelector"
+        v-model="selectedCategory"
+        :options="categories"
+        label="Select Category"
+        outlined
+        dense
+        rounded
+        emit-value
+        map-options
+        class="full-width"
+        @update:model-value="onAssetCategoryChanged"
+        :disable="assetCategorySelectorReadOnly"
+      />
     </div>
 
 
@@ -24,7 +40,9 @@
         :class="{ 'selected-item': selectedIndex === index }"
         >
           <q-item-section avatar v-if="isCheckBoxActive">
-            <q-checkbox v-model="item.checked" color="secondary" dense @click.stop />
+            <q-checkbox v-model="item.checked" color="secondary" dense 
+            @click.stop
+            @update:model-value="onCheckboxChanged" />
           </q-item-section>
           <q-item-section>
             {{ item.label }}
@@ -37,24 +55,44 @@
 
 <script setup>
 import { storeToRefs } from 'pinia';
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAssetsExplorerStore } from 'src/store/modules/assetsExplorerStore';
 import { useAssetGroupsStore } from 'src/store/modules/assetGroupsStore';
+import { fetchAssetsByCategory, generateNetwork } from 'src/api_services/assets_service';
+import { fetchAssetGroups } from 'src/api_services/asset_groups';
+import { 
+  getSurfaceNodes,
+  getConnections
+} from 'src/app_utils/visualizations/draw_network';
 
 const assetsExplorerStore = useAssetsExplorerStore();
 const assetGroupsStore = useAssetGroupsStore();
 const router = useRouter();
 
-//const assetExplorerTitle = computed(() => assetsExplorerStore.assetExplorerTitle);
-//const items = computed(() => assetsExplorerStore.listItems);
-//console.log(items)
-//const isCheckBoxActive = computed(() => assetsExplorerStore.isCheckBoxActive);
 
-const { listItems, assetExplorerTitle, isCheckBoxActive } = storeToRefs(assetsExplorerStore);
+const { assetExplorerTitle, listItems, isCheckBoxActive, isAssetCategorySelector } = storeToRefs(assetsExplorerStore);
 
 
-const selectedIndex = ref(null)
+const selectedIndex = ref(null);
+const assetCategorySelectorReadOnly = ref(false);
+
+// --- Dropdown logic ---
+const categories = ref([
+  { label: 'Drainage Points', value: 'drainagePoints' },
+  { label: 'Wells', value: 'wells' },
+  { label: 'Reservoirs', value: 'reservoirs' },
+  { label: 'Fields', value: 'fields' },
+  { label: 'Facilities', value: 'facilities' },
+  // { label: 'Central Processing Facilities', value: 'cpfs' },
+  // { label: 'Pipelines', value: 'pipelines' },
+  // { label: 'Dehydration Unit', value: 'dehydrationUnit' },
+  // { label: 'Gas Customer', value: 'gasCustomer' },
+  // { label: 'FCOT', value: 'fcot' }
+])
+
+const selectedCategory = ref('wells')
+
 
 function selectItem(index) {
  
@@ -62,13 +100,80 @@ function selectItem(index) {
   
   switch(router.currentRoute._value.fullPath){
     case '/asset-groups':
-
       assetGroupsStore.setStateData("selectedAssetGroup", {
         assetGroupName: listItems.value[index].label,
-        assetGroupDescription: listItems.value[index].description
+        assetGroupDescription: listItems.value[index].description,
+        id: listItems.value[index].id,
+      });
+      break;
+    case '/well-lift-curves-landing':
+      assetGroupsStore.setStateData("activeDrainagePoint", {
+        assetGroupName: listItems.value[index].label,
+        assetGroupDescription: listItems.value[index].description,
+        id: listItems.value[index].id,
+      });
+      break;
+    case '/lift-curves-import':
+      assetGroupsStore.setStateData("activeDrainagePoint", {
+        assetGroupName: listItems.value[index].label,
+        assetGroupDescription: listItems.value[index].description,
+        id: listItems.value[index].id,
       });
       break;
   }
+}
+
+function onAssetCategoryChanged(_selectedCategory) {
+
+  const selectedAssetGroupId = assetGroupsStore.selectedAssetGroup.id;
+
+  fetchAssets(_selectedCategory, selectedAssetGroupId);
+}
+
+async function onCheckboxChanged() {
+
+  const selected = listItems.value.filter(item => item.checked);
+  console.log('Selected items:', selected);
+
+  if(selected.length > 0){
+
+    const AssetGroupId = selected[0].AssetGroupId;
+    const payload = {
+      AssetGroupId,
+      assetCategory: selectedCategory.value,
+      assets: selected.map((row) => {
+        return {
+          id: row.id,
+          name: row.name
+        }
+      })
+    }
+
+    const networkResponse = await generateNetwork(payload);
+    
+    if(networkResponse.status === 200 || networkResponse.status === 201) {
+
+      const { equipmentConnections, equipmentNameImages } = networkResponse.data;
+
+      const surfaceNodes = getSurfaceNodes(equipmentConnections, equipmentNameImages);
+
+      const connections = getConnections(equipmentConnections);
+
+      console.log("surfaceNodes: ", surfaceNodes);
+      console.log("connections: ", connections);
+
+      assetsExplorerStore.setStateData("networkNodes", surfaceNodes);
+      assetsExplorerStore.setStateData("networkConnections", connections);
+
+    }
+    //
+
+  }else{
+    assetsExplorerStore.setStateData("networkNodes", []);
+    assetsExplorerStore.setStateData("networkConnections", []);
+  }
+  
+
 }
 
 function onAdd() {
@@ -85,17 +190,81 @@ function onAdd() {
 }
 
 function onImport() {
-  console.log('Import clicked')
-   router.push('/import-subsurface-assets')
+
+   switch(router.currentRoute._value.fullPath){
+    case 'subsurface-assets-landing':
+      router.push('/import-subsurface-assets');
+      break;
+    case '/well-lift-curves-landing':
+      router.push('/lift-curves-import');
+      break;
+  }
+}
+
+function onNetwork() {
+  router.push('/network-diagram')
 }
 
 function onDelete() {
   //items.value = items.value.filter(item => !item.checked)
 }
 
+async function fetchAssets(_selectedCategory, selectedAssetGroupId) {
+
+  const assets = await fetchAssetsByCategory(_selectedCategory, selectedAssetGroupId);
+  //console.log(assets);
+  assetsExplorerStore.setStateData("listItems", assets.map((row=>({
+            ...row,
+            label: row.name,
+            checked: false
+            }))));
+}
+
+async function getAssetGroups() {
+    console.log("getAssetGroups")
+    const assetGroups = await fetchAssetGroups();
+    console.log(assetGroups)
+    assetGroupsStore.setStateData("assetGroups", assetGroups);
+    assetsExplorerStore.setStateData("listItems", assetGroups.map((row=>({
+    ...row,
+    label: row.name,
+    checked: false
+    }))));
+
+
+  }
+
+  async function fetchListItems() {
+
+    console.log("assetGroupsStore.selectedAssetGroup: ", assetGroupsStore.selectedAssetGroup);
+
+    const selectedAssetGroupId = assetGroupsStore.selectedAssetGroup.id;
+  
+    console.log(router.currentRoute._value.fullPath)
+    switch(router.currentRoute._value.fullPath){
+      case '/asset-groups':
+        getAssetGroups();
+        break;
+      case '/subsurface-assets-landing':
+        fetchAssets(selectedCategory.value, selectedAssetGroupId);
+        break;
+      case '/well-lift-curves-landing':
+        assetCategorySelectorReadOnly.value = true;
+        fetchAssets('drainagePoints', selectedAssetGroupId);
+        break;
+    }
+}
+
 watch(listItems, (val) => {
-  console.log('listItems changed:', val)
+  //console.log('listItems changed:', val)
 }, { immediate: true })
+
+onMounted(async () => {
+
+  await fetchListItems();
+
+})
+
 </script>
 
 <style scoped>
@@ -165,6 +334,10 @@ watch(listItems, (val) => {
 
 .selected-item {
   background-color: #e6f4ff !important; /* Light blue highlight */
+}
+
+.full-width {
+  width: 100%;
 }
 
 

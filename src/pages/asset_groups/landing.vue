@@ -195,17 +195,17 @@ export default {
         }
     }
 
-    // const getAssetGroups = async () => {
+    const getAssetGroups = async () => {
 
-    //     const assetGroups = await fetchAssetGroups();
-    //     console.log(assetGroups)
-    //     assetGroupsStore.setStateData("assetGroups", assetGroups);
-    //     assetsExplorerStore.setStateData("listItems", assetGroups.map((row=>({
-    //     ...row,
-    //     label: row.name,
-    //     checked: false
-    //     }))));
-    // }
+        const assetGroups = await fetchAssetGroups();
+        console.log(assetGroups)
+        assetGroupsStore.setStateData("assetGroups", assetGroups);
+        assetsExplorerStore.setStateData("listItems", assetGroups.map((row=>({
+        ...row,
+        label: row.name,
+        checked: false
+        }))));
+    }
 
     // Toolbox buttons
     const toolboxButtons = ref([
@@ -235,6 +235,7 @@ export default {
       try {
         propertyGridStore.SetIsPropertyGridActivated(false)
         assetsExplorerStore.SetIsAssetsExplorerActivated(true)
+        assetsExplorerStore.setIsAssetCategorySelector(false) 
       } catch (error) {
         console.error('Store initialization error:', error)
       }

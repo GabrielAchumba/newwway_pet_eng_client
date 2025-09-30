@@ -38,6 +38,7 @@ export const usePropertyGridStore = defineStore('propertyGridStore', {
       this[variableName] = variableValue;
     },
     SetIsPropertyGridActivated(payload) {
+      //console.log("payload: ", payload)
       this.isPropertyGridActivated = payload;
     }
   }

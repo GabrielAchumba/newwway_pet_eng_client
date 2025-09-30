@@ -5,7 +5,13 @@ export const useAssetGroupsStore = defineStore('assetGroupsStore', {
     assetGroups: [],
     selectedAssetGroup: {
         assetGroupName: "",
-        assetGroupDescription: ""
+        assetGroupDescription: "",
+        id: -1,
+    },
+    activeDrainagePoint: {
+        name: "",
+        description: "",
+        id: -1,
     },
   }),
 

@@ -20,7 +20,7 @@ export const fetchAssets = async () => {
 
 export const createAssets = async (newAsset)  => {
     
-    console.log("newAsset: ", newAsset)
+    //console.log("newAsset: ", newAsset)
     try {
         var response = await post({
             url: "assets",
@@ -31,7 +31,35 @@ export const createAssets = async (newAsset)  => {
 
     } catch (error) {
 
-        console.log("error: ", error)
+        //console.log("error: ", error)
+        return error;
+    }
+}
+
+export const fetchAssetsByCategory = async (selectedAssetCategory, assetGroupId) => {
+
+    console.log("selectedAssetCategory: ", selectedAssetCategory);
+    console.log("assetGroupId: ", assetGroupId);
+
+    var response = await get({url: `assets/${selectedAssetCategory}/${assetGroupId}`});
+    return response.data;
+}
+
+
+export const generateNetwork = async (networkDto)  => {
+    
+    //console.log("networkDto: ", networkDto)
+    try {
+        var response = await post({
+            url: "assets/generateNetwork",
+            req: networkDto
+        });
+
+        return response;
+
+    } catch (error) {
+
+       // console.log("error: ", error)
         return error;
     }
 }

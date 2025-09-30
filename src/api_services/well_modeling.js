@@ -9,19 +9,19 @@ import {
 } from "src/httpservices/services";
 
 
-export const fetchAssetGroups = async () => {
+// export const fetchAssetGroups = async () => {
 
-    var response = await get({url: "asset-groups"});
-    //console.log(response)
-    return response.data;
-}
+//     var response = await get({url: "asset-groups"});
+//     //console.log(response)
+//     return response.data;
+// }
 
-export const createAssetGroup = async (newAssetGroup)  => {
+export const createLiftCurves = async (payload)  => {
     
     try {
         var response = await post({
-            url: "asset-groups",
-            req: newAssetGroup
+            url: "vlp/create-lift-curves",
+            req: payload
         });
 
         return response;
