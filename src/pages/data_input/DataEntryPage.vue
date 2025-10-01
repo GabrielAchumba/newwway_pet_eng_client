@@ -112,7 +112,10 @@ function handleTabClick(tab) {
 }
 
 function navigateTo(route) {
-  if (route) router.push(route)
+  if (route) {
+    console.log(route)
+    router.push(route)
+  }
 }
 
 onMounted(() => {

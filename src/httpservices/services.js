@@ -16,12 +16,12 @@ const get = async (payload) => {
       
     $http.get(payload.url, config)
      .then(response => { 
-        console.log(response)           
+        //console.log(response)           
         resolve(response)
          
      })
      .catch(error => {
-        console.log(error)
+        //console.log(error)
         reject(error)
      })
   })

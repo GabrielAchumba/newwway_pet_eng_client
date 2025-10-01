@@ -127,6 +127,7 @@ export default {
 
     const dropdownOptions = ref([
         'Water Cut', 
+        'Water Gas Ratio',
         'Water Oil Ratio', 
         'Gas Oil Ratio', 
         'Condensate Rate Ratio', 

@@ -8,8 +8,13 @@ const processEnvNOEENV = "dev";
 // good idea to move this instance creation inside of the
 // "export default () => {}" function below (which runs individually
 // for each client)
+
+//http://localhost:8000/
+//http://DESKTOP-14GKLSM:8000/
+//http://10.255.255.254:8000/
+//http://172.22.216.231:8000/
 const  $http = axios.create({  
-  baseURL: (processEnvNOEENV == 'production') ? 'https://tdragapi-bwo8s.ondigitalocean.app/' : 'http://localhost:8000/',
+  baseURL: (processEnvNOEENV == 'production') ? 'https://tdragapi-bwo8s.ondigitalocean.app/' : 'http://172.22.216.231:8000/',
   headers: {
     'Content-Type': 'application/json',
     //"Access-Control-Allow-Methods":"GET,PUT,POST,DELETE,PATCH,OPTIONS",

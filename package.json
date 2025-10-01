@@ -17,6 +17,7 @@
     "@quasar/extras": "^1.16.4",
     "axios": "^1.2.1",
     "pinia": "^3.0.3",
+    "plotly.js-dist": "^3.1.1",
     "plotly.js-dist-min": "^3.0.3",
     "popper.js": "^1.16.1",
     "quasar": "^2.16.0",

@@ -61,6 +61,7 @@ import { useAssetsExplorerStore } from 'src/store/modules/assetsExplorerStore';
 import { useAssetGroupsStore } from 'src/store/modules/assetGroupsStore';
 import { fetchAssetsByCategory, generateNetwork } from 'src/api_services/assets_service';
 import { fetchAssetGroups } from 'src/api_services/asset_groups';
+import { findLiftCurvesNamesPerDrainagePoint } from 'src/api_services/well_modeling';
 import { 
   getSurfaceNodes,
   getConnections
@@ -93,8 +94,24 @@ const categories = ref([
 
 const selectedCategory = ref('wells')
 
+async function getLiftCurvesNamesPerDrainagePoint() {
 
-function selectItem(index) {
+      const assetGroupId = assetGroupsStore.selectedAssetGroup.id;
+      console.log("assetGroupId: ", assetGroupId);
+      const drainagePointId = assetGroupsStore.activeDrainagePoint.id;
+      console.log("drainagePointId: ", drainagePointId);
+
+      const payload = {
+          drainagePointId,
+          assetGroupId,
+      }
+      const liftCurvesNames = await findLiftCurvesNamesPerDrainagePoint(payload);
+      console.log("liftCurvesNames: ", liftCurvesNames);
+
+  }
+
+
+async function selectItem(index) {
  
   selectedIndex.value = index
   
@@ -112,6 +129,8 @@ function selectItem(index) {
         assetGroupDescription: listItems.value[index].description,
         id: listItems.value[index].id,
       });
+
+      //await getLiftCurvesNamesPerDrainagePoint();
       break;
     case '/lift-curves-import':
       assetGroupsStore.setStateData("activeDrainagePoint", {
@@ -202,7 +221,15 @@ function onImport() {
 }
 
 function onNetwork() {
-  router.push('/network-diagram')
+
+   switch(router.currentRoute._value.fullPath){
+    case 'subsurface-assets-landing':
+      router.push('/network-diagram')
+      break;
+    case '/lift-curves-import':
+      router.push('/well-lift-curves-landing');
+      break;
+  }
 }
 
 function onDelete() {
@@ -218,6 +245,22 @@ async function fetchAssets(_selectedCategory, selectedAssetGroupId) {
             label: row.name,
             checked: false
             }))));
+
+  if(listItems.value.length > 0){
+
+    const index = 0;
+
+    switch(_selectedCategory) {
+      case "drainagePoints":
+        assetGroupsStore.setStateData("activeDrainagePoint", {
+          assetGroupName: listItems.value[index].label,
+          assetGroupDescription: listItems.value[index].description,
+          id: listItems.value[index].id,
+        });
+        break;
+    }
+  }
+
 }
 
 async function getAssetGroups() {

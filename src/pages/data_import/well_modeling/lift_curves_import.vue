@@ -169,9 +169,17 @@
         </div>
       </div>
       <div class="q-pa-md col-md-6 col-sm-12 col-xs-12">
-        <SensitivityVariablesTable
-          @value-changed="handleSensitivityChange"
-        />
+        <div class="q-pa-md">
+          <WellTypeSelector 
+            @well-type-changed="handleWellTypeChange"
+          />
+        </div>
+        <div class="q-pa-md">
+          <SensitivityVariablesTable
+            @value-changed="handleSensitivityChange"
+          />
+        </div>
+        
       </div>
     </div>
   </q-page>
@@ -184,6 +192,7 @@ import { useAssetsExplorerStore } from 'src/store/modules/assetsExplorerStore';
 import { useAssetGroupsStore } from 'src/store/modules/assetGroupsStore';
 import { createLiftCurves} from 'src/api_services/well_modeling';
 import SensitivityVariablesTable from './sensitivity_variables.vue';
+import WellTypeSelector from './well_type_selector.vue'
 
 // Import Quasar components explicitly
 import { QSpinnerGears, QInnerLoading } from 'quasar';
@@ -198,12 +207,17 @@ export default {
   components: {
     QSpinnerGears,
     QInnerLoading,
-    SensitivityVariablesTable
+    SensitivityVariablesTable,
+    WellTypeSelector
   },
   data() {
     return {
       filePath: '',
       fileContent: [],
+      SensitivityVariable1Name: 'Water Cut',
+      SensitivityVariable2Name: 'Gas Oil Ratio',
+      SensitivityVariable3Name: 'First Node Pressure',
+      wellType: 'Oil Producer',
       selectedLine: null,
       fileInfo: {
         name: '',
@@ -219,16 +233,30 @@ export default {
     }
   },
   methods: {
+    handleWellTypeChange(selectedValue) {
+      console.log('Selected Well Type:', selectedValue)
+      this.wellType = selectedValue;
+      // Handle the well type change here
+      // You can make API calls, update state, etc.
+    },
     handleSensitivityChange(eventData) {
       console.log('Sensitivity variable changed:', eventData)
-      
-      // You can handle the change here
-      // For example: update store, make API call, etc.
-      // this.$q.notify({
-      //   message: `Variable "${eventData.variable}" changed to ${eventData.newValue}`,
-      //   color: 'info',
-      //   position: 'top'
-      // })
+
+      switch(eventData.variable){
+        case 'Sensitivity Variable 1':
+          this.SensitivityVariable1Name = eventData.newValue;
+          console.log("this.SensitivityVariable1Name :", this.SensitivityVariable1Name);
+          break;
+        case 'Sensitivity Variable 2':
+          this.SensitivityVariable2Name = eventData.newValue;
+          console.log("this.SensitivityVariable2Name :", this.SensitivityVariable2Name);
+          break;
+        case 'Sensitivity Variable 3':
+          this.SensitivityVariable3Name = eventData.newValue;
+          console.log("this.SensitivityVariable3Name :", this.SensitivityVariable3Name);
+          break;
+      }
+
     },
     browseFile() {
       this.$refs.fileInput.click();
@@ -295,7 +323,10 @@ export default {
         const AssetGroupId = assetGroupsStore.selectedAssetGroup.id;
         console.log("AssetGroupId: ", AssetGroupId);
         const drainagePointId = assetGroupsStore.activeDrainagePoint.id;
+        const now = new Date();
+        const liftCurveName = `${assetGroupsStore.activeDrainagePoint.assetGroupName}_${now.toISOString()}`;
         console.log("assetGroupsStore.activeDrainagePoint: ", assetGroupsStore.activeDrainagePoint);
+        console.log("liftCurveName: ", liftCurveName);
 
       if (AssetGroupId == -1) {
         this.showStatus('No asset group selected', 'negative', 'warning');
@@ -311,10 +342,14 @@ export default {
             liftCurvesFileContent: this.fileContent,
             drainagePointId,
             AssetGroupId,
-            liftCurveName: "PlaceHolder"
+            liftCurveName,
+            SensitivityVariable1Name: this.SensitivityVariable1Name,
+            SensitivityVariable2Name: this.SensitivityVariable2Name,
+            SensitivityVariable3Name: this.SensitivityVariable3Name,
+            wellType: this.wellType
         }
 
-        console.log(this.fileContent)
+        console.log(payload)
 
       if (!this.fileContent.length) {
         this.showStatus('No file content to submit', 'negative', 'warning');
