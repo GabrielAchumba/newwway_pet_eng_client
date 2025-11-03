@@ -56,22 +56,29 @@
         </div>
 
         <!-- Second Component: Table or Chart -->
-        <div class="content-container">
-          <div v-show="!showChart" class="table-section">
-            <q-table
+        <!-- <div class="content-container"> -->
+
+          <!-- <div v-show="!showChart" class="table-section"> -->
+            <Table
+            v-show="!showChart"
+            :rows="tableData"
+            :columns="columns"
+            />
+            <!-- <q-table
               :rows="tableData"
               :columns="columns"
               row-key="sn"
               flat
               bordered
               class="bg-white"
-            />
-          </div>
+            /> -->
+          <!-- </div> -->
           
-          <div v-show="showChart" class="chart-section">
-            <div ref="chartContainer" class="plotly-chart"></div>
-          </div>
-        </div>
+          <!-- <div class="content-container"> -->
+            <div v-show="showChart" class="chart-section">
+              <div ref="chartContainer" class="plotly-chart"></div>
+            </div>
+        <!-- </div> -->
       </div>
 
       <!-- Right Section (Narrower) - Third Component -->
@@ -82,12 +89,13 @@
           :rate="currentRate"
           :pwf="currentPwf"
           @curve-change="onCurveChange"
-          @ipr-update="onIprUpdate"
+          @update-parameter-data="onParameterDataUpdate"
           @sensitivity-selected="onVLPSensitivitySelected"
           :vlpSensitivitiesPaneProp="vlpSensitivitiesPaneProp"
           :vlpSensitivitiesProp="vlpSensitivitiesProp"
           :vlpSensitivityTitleProp="vlpSensitivityTitle"
           :selectedSensitivityIdProp="selectedSensitivityId"
+          :parametersDataProp="parametersDataProp"
         />
       </div>
     </div>
@@ -103,7 +111,8 @@ import { useAuthStore } from 'src/store/modules/authStore';
 import { usePropertyGridStore } from 'src/store/modules/propertyGridStore';
 import { useAssetsExplorerStore } from 'src/store/modules/assetsExplorerStore';
 import { useAssetGroupsStore } from 'src/store/modules/assetGroupsStore';
-import { findLiftCurvesNamesPerDrainagePoint, findOneLiftCurves } from 'src/api_services/well_modeling';
+import { findLiftCurvesNamesPerDrainagePoint, findOneLiftCurves, calculateVLP } from 'src/api_services/well_modeling';
+import Table from "src/components/controls/table.vue";
 import IPRIcon from 'src/assets/images/ipr-icon.png';
 
 const authStore = useAuthStore();
@@ -117,7 +126,8 @@ const { activeDrainagePoint } = storeToRefs(assetGroupsStore);
 export default {
   name: 'WellLiftCurvesLanding',
   components: {
-    RightPane
+    RightPane,
+    Table
   },
   setup() {
     const showChart = ref(false)
@@ -132,21 +142,65 @@ export default {
     const liftCurvesRecord = ref({});
     const vlpSensitivityTitle = ref("");
     const selectedSensitivityId = ref("");
+    const parametersDataProp = ref([]);
+    const sensitivityVariable1Value = ref(0);
+    const sensitivityVariable2Value = ref(0);
+    const sensitivityVariable3Value = ref(0);
 
     const vlpSensitivityVariables = ref({
-        'Water Cut': "WC", 
-        'Water Gas Ratio': "WGR",
-        'Water Oil Ratio': "WOR", 
-        'Gas Oil Ratio': "GOR", 
-        'Condensate Rate Ratio': "CGR", 
-        'GLR Free': "GLRFree",
-        'Free Gas Rate': "FreeGasRate",
-        'GOR Free': "GORFree",
-        'Total GOR': "TotalGOR",
-        'Dissolved and Free GLR': "DissolvedFreeGLR",
-        'First Node Pressure': "FirstNodePressure",
-        'Tubing Roughness': "TubingRoughness",
-        'Downhole Heat Transfer Coefficient': "'DownholeHeatTransferCoefficient'"
+        'Water Cut': {
+          name: "WC",
+          value: 0,
+        }, 
+        'Water Gas Ratio': {
+          name: "WGR",
+          value: 0,
+        },
+        'Water Oil Ratio': {
+          name: "WOR",
+          value: 0,
+        }, 
+        'Gas Oil Ratio': {
+          name: "GOR",
+          value: 0,
+        }, 
+        'Condensate Rate Ratio': {
+          name: "CGR",
+          value: 0,
+        }, 
+        'GLR Free': {
+          name: "GLRFree",
+          value: 0,
+        },
+        'Free Gas Rate': {
+          name: "FreeGasRate",
+          value: 0,
+        },
+        'GOR Free': {
+          name: "GORFree",
+          value: 0,
+        },
+        'Total GOR': {
+          name: "TotalGOR",
+          value: 0,
+        },
+        'Dissolved and Free GLR': {
+          name: "DissolvedFreeGLR",
+          value: 0,
+        },
+        'First Node Pressure': {
+          name: "FirstNodePressure",
+          value: 0,
+        },
+        'Tubing Roughness': {
+          name: "TubingRoughness",
+          value: 0,
+        },
+        'Downhole Heat Transfer Coefficient': {
+          name: "DownholeHeatTransferCoefficient",
+          value: 0,
+
+        }
     })
     
     // Table data
@@ -263,9 +317,66 @@ export default {
         console.log("tableData.value: ", tableData.value);
     }
 
-    const activateTool = (tool) => {
+    const updateTableData2 = (calRates, calFBHPs, calFWHTs) => {
+  
+
+        tableData.value = calRates.map((calRate, idx) => {
+            return {
+               sn: idx+1,
+               rate: calRate, 
+               fbhPressure: calFBHPs[idx], 
+               fwhTemperature: calFWHTs[idx]
+            }
+        })
+        console.log("tableData.value: ", tableData.value);
+    }
+
+    const activateTool = async (tool) => {
       console.log(`Activated tool: ${tool}`)
-      // Implement tool-specific functionality here
+      
+      switch(tool){
+        case "vlp":
+          await calculateVLPCurve();
+          break;
+      }
+    }
+
+    const calculateVLPCurve = async () => {
+
+      const assetGroupId = assetGroupsStore.selectedAssetGroup.id;
+      console.log("assetGroupId: ", assetGroupId);
+      const drainagePointId = assetGroupsStore.activeDrainagePoint.id;
+      console.log("drainagePointId: ", drainagePointId);
+
+
+      const vlpCalculatorDto = {
+        drainagePointId,
+        AssetGroupId: assetGroupId,
+        liftCurveName: selectedCurve.value,
+        SensitivityVariable1Name: liftCurvesRecord.value.SensitivityVariable1Name,
+        SensitivityVariable1Value: sensitivityVariable1Value.value,
+        SensitivityVariable2Name: liftCurvesRecord.value.SensitivityVariable2Name,
+        SensitivityVariable2Value: sensitivityVariable2Value.value,
+        SensitivityVariable3Name: liftCurvesRecord.value.SensitivityVariable3Name,
+        SensitivityVariable3Value: sensitivityVariable3Value.value,
+        wellType: liftCurvesRecord.value.wellType
+      }
+
+      console.log("vlpCalculatorDto: ", vlpCalculatorDto);
+      
+      const vlpCurveResponse = await calculateVLP(vlpCalculatorDto);
+      console.log("vlpCurveResponse: ", vlpCurveResponse);
+      if(vlpCurveResponse.status == 200 || vlpCurveResponse.status == 201){
+
+        const { rates, results } = vlpCurveResponse.data;
+        const calFWHTs = [];
+        const calFBHPs = results.map((row, idx) => {
+
+          calFWHTs.push(row.temperature);
+          return row.pressure;
+        })
+        updateTableData2(rates, calFBHPs, calFWHTs)
+      }
     }
 
     const onCurveChange = (curve) => {
@@ -273,9 +384,23 @@ export default {
       // Handle curve change logic
     }
 
-    const onIprUpdate = (iprData) => {
-      console.log('IPR data updated:', iprData)
-      // Handle IPR data update
+    const onParameterDataUpdate = (parameterData) => {
+      console.log('IPR data updated:', parameterData)
+
+      if(liftCurvesRecord.value.SensitivityVariable1Name == parameterData.title){
+        sensitivityVariable1Value.value = Number(parameterData.value);
+        console.log('sensitivityVariable1Value.value: ', sensitivityVariable1Value.value)
+      }
+
+      if(liftCurvesRecord.value.SensitivityVariable2Name == parameterData.title){
+        sensitivityVariable2Value.value = Number(parameterData.value);
+        console.log('sensitivityVariable2Value.value: ', sensitivityVariable2Value.value)
+      }
+
+      if(liftCurvesRecord.value.SensitivityVariable3Name == parameterData.title){
+        sensitivityVariable3Value.value = Number(parameterData.value);
+        console.log('sensitivityVariable3Value.value: ', sensitivityVariable3Value.value)
+      }
     }
 
     const getLiftCurvesNamesPerDrainagePoint= async () =>{
@@ -311,7 +436,7 @@ export default {
                 const senVar1Name = liftCurvesNamesResponse.data.firstLiftCurvesRecord.SensitivityVariable1Name;
                 const senVar2Name = liftCurvesNamesResponse.data.firstLiftCurvesRecord.SensitivityVariable2Name;
                 const senVar3Name = liftCurvesNamesResponse.data.firstLiftCurvesRecord.SensitivityVariable3Name;
-                vlpSensitivityTitle.value = "VLP Sensitivities\n" + `${vlpSensitivityVariables.value[senVar1Name]}_${vlpSensitivityVariables.value[senVar2Name]}_${vlpSensitivityVariables.value[senVar3Name]}`
+                vlpSensitivityTitle.value = "VLP Sensitivities\n" + `${vlpSensitivityVariables.value[senVar1Name].name}_${vlpSensitivityVariables.value[senVar2Name].name}_${vlpSensitivityVariables.value[senVar3Name].name}`
                 if(vlpSensitivitiesProp.value.length > 0){
                     selectedSensitivityId.value = vlpSensitivitiesProp.value[0].id;
                 }
@@ -319,9 +444,42 @@ export default {
                 console.log("liftCurvesKeys: ", liftCurvesKeys);
                 updateTableData(liftCurvesKeys[0]);
                 console.log("vlpSensitivityTitle.value: ", vlpSensitivityTitle.value);
+                console.log("senVar1Name: ", senVar1Name);
+                console.log("senVar2Name: ", senVar2Name);
+                console.log("senVar3Name: ", senVar3Name);
+                console.log("vlpSensitivityVariables.value: ", vlpSensitivityVariables.value);
+
+                parametersDataProp.value = [];
+                const vlpSensitivityVariablesKeys = Object.keys(vlpSensitivityVariables.value);
+                for(const vlpSensitivityVariablesKey of vlpSensitivityVariablesKeys){
+                  
+                  console.log("vlpSensitivityVariablesKey: ", vlpSensitivityVariablesKey);
+                  if(senVar1Name == vlpSensitivityVariablesKey){
+                    parametersDataProp.value.push({
+                      ...vlpSensitivityVariables.value[vlpSensitivityVariablesKey],
+                      title: vlpSensitivityVariablesKey 
+                    })
+                  }
+
+                  if(senVar2Name == vlpSensitivityVariablesKey){
+                    parametersDataProp.value.push({
+                      ...vlpSensitivityVariables.value[vlpSensitivityVariablesKey],
+                      title: vlpSensitivityVariablesKey 
+                    })
+                  }
+
+                  if(senVar3Name == vlpSensitivityVariablesKey){
+                    parametersDataProp.value.push({
+                      ...vlpSensitivityVariables.value[vlpSensitivityVariablesKey],
+                      title: vlpSensitivityVariablesKey 
+                    })
+                  }
+
+                  console.log("parametersDataProp: ", parametersDataProp)
+                }
             }
         }
-        console.log("liftCurvesNamesResponse: ", liftCurvesNamesResponse);
+        //console.log("liftCurvesNamesResponse: ", liftCurvesNamesResponse);
 
     }
 
@@ -372,7 +530,7 @@ export default {
       toggleChartTable,
       activateTool,
       onCurveChange,
-      onIprUpdate,
+      onParameterDataUpdate,
       iprIcon,
       vlpSensitivitiesPaneProp,
       vlpSensitivitiesProp,
@@ -382,7 +540,11 @@ export default {
       selectedSensitivityId,
       onVLPSensitivitySelected,
       updateTableData,
-      updateChartData
+      updateChartData,
+      parametersDataProp,
+      sensitivityVariable1Value,
+      sensitivityVariable2Value,
+      sensitivityVariable3Value
     }
   }
 }
@@ -424,13 +586,13 @@ export default {
 }
 
 .chart-section {
-  height: 100%;
+  height: 80%;
   width: 100%;
 }
 
 .plotly-chart {
   width: 100%;
-  height: 100%;
+  height: 80%;
   min-height: 500px;
 }
 

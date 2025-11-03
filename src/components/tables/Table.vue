@@ -392,7 +392,7 @@
     }
 </script>
 
-<style scoped>
+<style  scoped>
 
 .screenwide{
   max-width: 100% !important

@@ -33,6 +33,7 @@
 
 <script>
 import { ref } from 'vue'
+import { WELLTYPES } from '../../../constants/asset_models';
 
 export default {
   name: 'WellTypeSelector',
@@ -42,43 +43,7 @@ export default {
   setup(props, { emit }) {
     const selectedWellType = ref(null)
     
-    const wellTypeOptions = ref([
-      {
-        sn: 1,
-        variable: 'Oil Producer',
-        value: 'Oil Producer',
-      },
-      {
-        sn: 2,
-        variable: 'Water Injector',
-        value: 'Water Injector',
-      },
-      {
-        sn: 3,
-        variable: 'Gas Injector',
-        value: 'Gas Injector'
-      },
-      {
-        sn: 4,
-        variable: 'ESP Producer',
-        value: 'ESP Producer',
-      },
-      {
-        sn: 5,
-        variable: 'Producer Gas Lift',
-        value: 'Producer Gas Lift',
-      },
-      {
-        sn: 6,
-        variable: 'Dry Gas Producer',
-        value: 'Dry Gas Producer',
-      },
-      {
-        sn: 7,
-        variable: 'Retrograde Condensate Producer',
-        value: 'Retrograde Condensate Producer',
-      }
-    ])
+    const wellTypeOptions = ref(WELLTYPES)
 
     const onWellTypeChange = (value) => {
       emit('well-type-changed', value)

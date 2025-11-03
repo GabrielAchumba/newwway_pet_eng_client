@@ -86,12 +86,13 @@ const tabData = reactive({
           { title: 'Operations', description: 'Enter drill operations data', image: DailyOilProductionImage, route: "/" },
           { title: 'Subsurface', description: 'Enter subsurface data', image: DailyOilProductionImage, route: "/" },
         ],
-        'Well Completion': [
+        'Drainage Point': [
+          { title: 'Configure', description: 'Initialize dranaige-point data', image: DailyOilProductionImage, route: '/drainage-point-config-landing' },
+          { title: 'DCA Model', description: 'Enter decline curve analysis input data', image: DailyOilProductionImage, route: '/drainage-point-dca-input-landing' },
+          { title: 'IPR Model', description: 'Enter inflow performance relationship input data', image: DailyOilProductionImage, route: "/" },
           { title: 'Lift Curves', description: 'View or import lift curves', image: DailyOilProductionImage, route: '/well-lift-curves-landing' },
-          { title: 'Down Hole Equipemnts', description: 'Enter down hole equipments', image: DailyOilProductionImage, route: "/" },
-          { title: 'Sand Control', description: 'Enter the sand control equipment data', image: DailyOilProductionImage, route: "/" },
-          { title: 'Geothermal Gradient', description: 'Enter the geothermal  data of the formation', image: DailyOilProductionImage, route: "/" },
-          { title: 'View Completed Well Schematic', description: 'Enter mud and mud temperature and pressure data', image: DailyOilProductionImage, route: "/" },
+          { title: 'Constraints', description: 'Enter drainage-point constraint values', image: DailyOilProductionImage, route: '/drainage-point-constraints-landing' },
+          { title: 'Schedule', description: 'Enter time dependent constraints and other schedules', image: DailyOilProductionImage, route: "/" },
         ],
         'Surface Systems Data': [
           { title: 'Equipments Capacities', description: 'Enter equipments capacities', image: DailyOilProductionImage, route: "/" },

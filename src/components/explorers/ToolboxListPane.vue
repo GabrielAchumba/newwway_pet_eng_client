@@ -4,10 +4,27 @@
     <div class="row items-center justify-between q-pa-sm">
         <!-- Toolbox on the right -->
         <div class="toolbox row items-center q-gutter-sm">
-            <q-btn flat round icon="add" size="sm" @click="onAdd" />
-            <q-btn flat round icon="upload" size="sm" @click="onImport" />
-            <q-btn flat round icon="share" size="sm" @click="onNetwork" />
-            <q-btn flat round icon="delete" size="sm" color="negative" @click="onDelete" />
+            <q-btn flat round icon="add" size="sm" @click="onAdd">
+              <q-tooltip>
+                Add
+              </q-tooltip>
+            </q-btn>
+            <q-btn flat round icon="upload" size="sm" @click="onImport" >
+              <q-tooltip>
+                import
+              </q-tooltip>
+
+            </q-btn>
+            <q-btn flat round icon="arrow_back" size="sm" @click="onNetwork" >          
+              <q-tooltip>
+                Previous
+              </q-tooltip>
+            </q-btn>
+            <q-btn flat round icon="delete" size="sm" color="negative" @click="onDelete" >    
+              <q-tooltip>
+                Delete
+              </q-tooltip>
+            </q-btn>
         </div>
     </div>
 
@@ -139,6 +156,27 @@ async function selectItem(index) {
         id: listItems.value[index].id,
       });
       break;
+    case '/drainage-point-config-landing':
+      assetGroupsStore.setStateData("activeDrainagePoint", {
+        assetGroupName: listItems.value[index].label,
+        assetGroupDescription: listItems.value[index].description,
+        id: listItems.value[index].id,
+      });
+      break;
+    case '/drainage-point-constraints-landing':
+      assetGroupsStore.setStateData("activeDrainagePoint", {
+        assetGroupName: listItems.value[index].label,
+        assetGroupDescription: listItems.value[index].description,
+        id: listItems.value[index].id,
+      });
+      break;
+    case '/drainage-point-dca-input-landing':
+      assetGroupsStore.setStateData("activeDrainagePoint", {
+        assetGroupName: listItems.value[index].label,
+        assetGroupDescription: listItems.value[index].description,
+        id: listItems.value[index].id,
+      });
+      break;
   }
 }
 
@@ -180,6 +218,7 @@ async function onCheckboxChanged() {
 
       console.log("surfaceNodes: ", surfaceNodes);
       console.log("connections: ", connections);
+      
 
       assetsExplorerStore.setStateData("networkNodes", surfaceNodes);
       assetsExplorerStore.setStateData("networkConnections", connections);
@@ -217,6 +256,15 @@ function onImport() {
     case '/well-lift-curves-landing':
       router.push('/lift-curves-import');
       break;
+    case '/drainage-point-config-landing':
+      router.push('/drainage-point-config-import');
+      break;
+    case '/drainage-point-constraints-landing':
+      router.push('/drainage-point-constraints-import');
+      break;
+    case '/drainage-point-dca-input-landing':
+      router.push('/drainage-point-dca-input-import');
+      break;
   }
 }
 
@@ -228,6 +276,15 @@ function onNetwork() {
       break;
     case '/lift-curves-import':
       router.push('/well-lift-curves-landing');
+      break;
+    case '/drainage-point-config-import':
+      router.push('/drainage-point-config-landing');
+      break;
+    case '/drainage-point-constraints-import':
+      router.push('/drainage-point-constraints-landing');
+      break;
+    case '/drainage-point-dca-input-import':
+      router.push('/drainage-point-dca-input-landing');
       break;
   }
 }
@@ -292,6 +349,18 @@ async function getAssetGroups() {
         fetchAssets(selectedCategory.value, selectedAssetGroupId);
         break;
       case '/well-lift-curves-landing':
+        assetCategorySelectorReadOnly.value = true;
+        fetchAssets('drainagePoints', selectedAssetGroupId);
+        break;
+      case '/drainage-point-config-landing':
+        assetCategorySelectorReadOnly.value = true;
+        fetchAssets('drainagePoints', selectedAssetGroupId);
+        break;
+      case '/drainage-point-constraints-landing':
+        assetCategorySelectorReadOnly.value = true;
+        fetchAssets('drainagePoints', selectedAssetGroupId);
+        break;
+      case '/drainage-point-dca-input-landing':
         assetCategorySelectorReadOnly.value = true;
         fetchAssets('drainagePoints', selectedAssetGroupId);
         break;
@@ -376,7 +445,10 @@ onMounted(async () => {
 }
 
 .selected-item {
-  background-color: #e6f4ff !important; /* Light blue highlight */
+  /*background-color: #e6f4ff !important;  Light blue highlight */
+  background-color: #1976d2;
+  color: white;
+
 }
 
 .full-width {

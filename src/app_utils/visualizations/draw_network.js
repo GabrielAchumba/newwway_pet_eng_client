@@ -7,14 +7,20 @@ const getEquipmentImage = (internalExternalFacilitiesNames, node) => {
 
   // Default image/shape
   let image = Flowstation;
+  let nodeType = "Facility";
 
   for (const item of internalExternalFacilitiesNames) {
     if (item.originalExternalEquipmentName === node) {
-      return item.image || Flowstation; // fall back if image property is missing
+      return {
+        image: item.image || Flowstation,
+        nodeType: item.type || nodeType,
+        assetGroupId: item.assetGroupId, 
+        assetId: item.assetId
+      } // fall back if image property is missing
     }
   }
 
-  return image;
+  return { image, nodeType, assetGroupId: 0, assetId: 0} ;
 };
 
 // { id: 'ABU_FS1', label: 'ABU_FS1', x: 500, y: -200, color: '#3498db', shape: 'image', image: Flowstation, font: { size: 16, color: 'black' } },
@@ -73,7 +79,7 @@ export const getSurfaceNodes = (equipmentConnections, internalExternalFacilities
 
             if(surfaceNodeIdx < 0){
 
-                const image = getEquipmentImage(internalExternalFacilitiesNames, node);
+                const { image, nodeType, assetGroupId, assetId} = getEquipmentImage(internalExternalFacilitiesNames, node);
 
                 surfaceNodes.push({
                     id: node,
@@ -83,6 +89,9 @@ export const getSurfaceNodes = (equipmentConnections, internalExternalFacilities
                     color: '#3498db',
                     shape:'image', 
                     image,
+                    nodeType,
+                    assetGroupId,
+                    assetId,
                     font: {
                     size: 16,
                     color: 'black'

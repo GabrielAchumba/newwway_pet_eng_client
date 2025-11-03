@@ -9,7 +9,9 @@ export const useAssetsExplorerStore = defineStore('assetsExplorerStore', {
     selectedItem: {},
     isAssetCategorySelector: false,
     networkNodes: [],
-    networkConnections: []
+    networkConnections: [],
+    assetGroupId: 0, 
+    assetId: 0
   }),
 
   actions: {

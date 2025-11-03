@@ -37,15 +37,17 @@
       <div class="section-title">Parameters</div>
       <div class="ipr-form">
         <q-input
-          v-model="iprData.gor"
-          label="GOR"
+          v-for="parameterData in parametersData"
+          :key="parameterData.name"
+          v-model="parameterData.value"
+          :label="parameterData.title"
           outlined
           dense
           type="number"
           class="q-mb-sm"
-          @update:model-value="onIprUpdate"
+          @update:model-value="onParameterDataUpdate(parameterData)"
         />
-        <q-input
+        <!-- <q-input
           v-model="iprData.waterCut"
           label="Water Cut"
           outlined
@@ -71,7 +73,7 @@
           type="number"
           class="q-mb-sm"
           @update:model-value="onIprUpdate"
-        />
+        /> -->
       </div>
     </div>
 
@@ -126,6 +128,10 @@ export default {
         default: true
 
     },
+    parametersDataProp: {
+        type: Array,
+        default: () => []
+    },
     vlpSensitivitiesPaneProp: {
         type: Boolean,
         default: false
@@ -143,7 +149,7 @@ export default {
         default: ""
     }
   },
-  emits: ['curve-change', 'ipr-update', 'sensitivity-selected'],
+  emits: ['curve-change', 'update-parameter-data', 'sensitivity-selected'],
   setup(props, { emit }) {
 
     const liftCurvesOptions = computed(() => {
@@ -162,6 +168,8 @@ export default {
     const vlpSensitivities = computed(() => props.vlpSensitivitiesProp);
 
     const vlpSensitivityTitle = computed(() => props.vlpSensitivityTitleProp);
+
+    const parametersData = computed(() => props.parametersDataProp);
 
     // Track selected sensitivity
     const selectedSensitivityId = ref(props.selectedSensitivityIdProp);
@@ -189,15 +197,16 @@ export default {
       gor: 500,
       waterCut: 15,
       pi: 2.5,
-      pressure: 2500
+      pressure: 2500,
+
     })
 
     const onCurveChange = (newCurve) => {
       emit('curve-change', newCurve)
     }
 
-    const onIprUpdate = () => {
-      emit('ipr-update', iprData.value)
+    const onParameterDataUpdate = (parameterData) => {
+      emit('update-parameter-data', parameterData)
     }
 
     return {
@@ -206,8 +215,8 @@ export default {
       vlpSensitivities,
       selectedSensitivityId,
       selectSensitivity,
-      iprData,
-      onIprUpdate,
+      parametersData,
+      onParameterDataUpdate,
       onCurveChange,
       ratePwfSection,
       parameters,

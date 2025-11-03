@@ -3,7 +3,7 @@
 </template>
 
 <script>
-import NetworkVisualization from '../../components/networks/custom_network6.vue';
+import NetworkVisualization from '../../components/networks/subsurface_network.vue';
 import { usePropertyGridStore } from 'src/store/modules/propertyGridStore';
 import { useAssetsExplorerStore } from 'src/store/modules/assetsExplorerStore';
 

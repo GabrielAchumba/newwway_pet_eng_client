@@ -25,6 +25,12 @@ const routes = [
       { path: '/network-diagram', component: () => import('src/pages/visualization/network_diagram.vue')},
       { path: '/well-lift-curves-landing', component: () => import('src/pages/data_input/well_modeling/well_lift_curves_landing.vue')},
       { path: '/lift-curves-import', component: () => import('src/pages/data_import/well_modeling/lift_curves_import.vue')},
+      { path: '/drainage-point-config-landing', component: () => import('src/pages/data_input/well_modeling/dp_config/drainage_point_config_landing.vue')},
+      { path: '/drainage-point-config-import', component: () => import('src/pages/data_import/well_modeling/dp_config_input_import.vue')},
+      { path: '/drainage-point-constraints-import', component: () => import('src/pages/data_import/well_modeling/dp_constraints_input_import.vue')},
+      { path: '/drainage-point-constraints-landing', component: () => import('src/pages/data_input/well_modeling/dp_constraints/dp_constraints_landing.vue')},
+      { path: '/drainage-point-dca-input-import', component: () => import('src/pages/data_import/well_modeling/dp_dca_input_import.vue')},
+      { path: '/drainage-point-dca-input-landing', component: () => import('src/pages/data_input/well_modeling/dp_dca/dp_dca_input_landing.vue')},
     ]
   },
 

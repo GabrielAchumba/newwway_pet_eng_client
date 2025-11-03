@@ -1,11 +1,13 @@
 <template>
   <q-page class="asset-groups-page">
-    <Toolbox :buttons="toolboxButtons" />
+    <Toolbox 
+    :buttons="toolboxButtons"
+    :toolBoxTitle="pageTitle" />
 
     <div class="page-container">
       <div class="row q-col-gutter-lg">
         <!-- SETUP Section -->
-        <div class="col-12">
+        <div class="col-sm-12 col-xs-12 col-md-4 col-lg-4 col-xl-4">
           <q-card class="setup-section">
             <q-card-section>
               <div class="text-caption">SELECTED ASSET GROUP</div>
@@ -30,15 +32,22 @@
                   filled
                   v-model="selectedAssetGroup.assetGroupDescription"
                   label="Description"
-                  type="text"
+                  type="textarea"
                   stack-label
                   bg-color="card-bg"
                   color="secondary"
+                  style="height: 50vh;"
                 />
               </div>
             </q-card-section>
           </q-card>
         </div>
+
+        <UnitsConfig class="col-sm-12 col-xs-12 col-md-8 col-lg-8 col-xl-8"/>
+
+        <!-- <div class="col-sm-12 col-xs-12 col-md-8 col-lg-8 col-xl-8">
+          <UnitsConfig/>
+        </div> -->
 
       </div>
     </div>
@@ -70,12 +79,14 @@ import Toolbox from 'src/components/headers/CustomToolBox.vue';
 import CustomDialog from "src/components/dialogs/CustomDialog.vue";
 import { dialogsAssetGroupsLanding } from "./view_models/landing_vm";
 import { createAssetGroup } from "src/api_services/asset_groups";
+import UnitsConfig from "./units_config.vue";
 
 
 export default {
   components: {
     Toolbox,
-    CustomDialog
+    CustomDialog,
+    UnitsConfig
   },
   setup() {
 
@@ -87,6 +98,7 @@ export default {
     const items = computed(() => assetsExplorerStore.listItems);
     const selectedAssetGroup = computed(() => assetGroupsStore.selectedAssetGroup);
     const dialogs = ref([...dialogsAssetGroupsLanding]);
+    const pageTitle = ref("Asset-group & Units")
     
 
     // Methods
@@ -212,18 +224,23 @@ export default {
       {
         icon: 'save',
         tooltip: 'Save',
+        title: 'Save',
         handler: saveData,
-        class: 'text-secondary'
+        class: 'text-secondary',
+        style: "border-right: 2px solid #0A1D3F;"
       },
       {
         icon: 'download',
         tooltip: 'Load data',
+        title: 'Load data',
         handler: LoadSelectedAssetGroupData,
-        class: 'text-secondary'
+        class: 'text-secondary',
+        style: "border-right: 2px solid #0A1D3F;"
       },
       {
         icon: 'cancel',
         tooltip: 'Cancel',
+        title: 'Cancel',
         handler: cancelChanges,
         class: 'text-secondary'
       },
@@ -261,7 +278,8 @@ export default {
       printData,
       cancelDialog,
       okDialog,
-      LoadSelectedAssetGroupData
+      LoadSelectedAssetGroupData,
+      pageTitle
     }
   }
 }
@@ -269,7 +287,7 @@ export default {
 
 <style lang="scss">
 .asset-groups-page {
-  background-color: $primary;
+  background-color: #F0F4F8;
   height: 100vh;
   overflow-y: scroll;
   scrollbar-width: none; /* Firefox */
@@ -290,6 +308,7 @@ export default {
     color: $forecolor1;
     border-radius: 8px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    height: 80vh;
 
     .text-caption {
       color: $secondary;

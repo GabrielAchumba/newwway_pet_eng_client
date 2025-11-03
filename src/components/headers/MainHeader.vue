@@ -38,8 +38,8 @@
 
         <!-- Name and Title -->
         <div class="column items-end">
-          <div class="text-subtitle2 text-grey-9">Gabriel</div>
-          <div class="text-caption text-grey">Reservoir Engineer</div>
+          <div class="text-subtitle2 text-grey-9">James Smith</div>
+          <div class="text-caption text-grey">Production Technologist</div>
         </div>
 
         <!-- Profile Initials Box -->
@@ -66,7 +66,8 @@
 
 <script setup>
 import { ref, computed} from 'vue'
-import userImage from 'src/assets/images/user.JPG'
+//import userImage from 'src/assets/images/user.JPG'
+import userImage from 'src/assets/images/placeholder_user.jpg'
 import { useAssetsExplorerStore } from 'src/store/modules/assetsExplorerStore';
 import { useAssetGroupsStore } from 'src/store/modules/assetGroupsStore';
 

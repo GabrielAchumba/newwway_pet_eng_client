@@ -69,7 +69,7 @@ const menuItems = [
   {name: 'Planners Dashboard', icon: 'storage', route: '/planners-dashboard'},
   {name: 'Economics Dashboard', icon: 'storage', route: '/economics-dashboard'},
   {name: 'Operations Dashboard', icon: 'storage', route: '/operations-dashboard'},
-  {name: 'Assets', icon: 'storage', route: '/assets-landing'},
+  {name: 'Assets Network', icon: 'share', route: '/assets-landing'},
   {name: 'Data', icon: 'storage', route: '/data-input'},
   {name: 'DCA', icon: 'folder', route: '/dca-landing'},
   {name: 'Drilling Sequence', icon: 'layers', route: '/'},

@@ -61,3 +61,21 @@ export const findOneLiftCurves = async (payload)  => {
         return error;
     }
 }
+
+export const calculateVLP = async (payload) => {
+    
+    try {
+        var response = await post({
+            url: `vlp/calculate-vlp-curve`,
+            req: payload
+        });
+
+        return response;
+
+    } catch (error) {
+
+        //console.log("error: ", error)
+        return error;
+    }
+
+}
