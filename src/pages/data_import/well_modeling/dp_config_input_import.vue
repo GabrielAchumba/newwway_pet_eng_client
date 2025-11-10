@@ -53,6 +53,15 @@ import { useRouter } from 'vue-router'
 import { createBulfConfigInput } from "src/api_services/drainage_point_input";
 import { WELLMODELS, FLUIDTYPES, WELLTYPES } from "src/constants/asset_models";
 
+import {
+    unitNamesRecord,
+    DrainagePoint,
+    WellModel,
+    OnstreamDate,
+    WellType,
+    FluidType
+} from "../../../units_quantities/unitNames";
+
 const authStore = useAuthStore();
 const router = useRouter();
 const propertyGridStore = usePropertyGridStore();
@@ -91,24 +100,33 @@ export default {
             applicationColumns: [],
             dialogs: dialogsDpConfigImport,
             tableRows: [],
+            tableColumnUnits: [],
             isImportComplete: false,
             productionHistoryCollection: [],
-            payload: [],
+            payload: {
+               tableColumnUnits: [],
+               tableRows: []
+            },
             drainagePoints: []
         }
     },
     methods:{
-        Create(tableRows){
+        Create(payload){
             const context = this;
-            context.tableRows = tableRows;
+            context.tableRows = payload.tableRows;
+            context.tableColumnUnits = payload.tableColumnUnits;
 
             console.log(context.assetGroups);
             console.log(context.selectedAssetGroup);
-             console.log(tableRows);
+            console.log(payload.tableRows);
+            console.log(payload.tableColumnUnits);
 
-             context.payload = [];
+            context.payload = {
+            tableColumnUnits: [...payload.tableColumnUnits],
+            tableRows: []
+            };
 
-            for(const row of tableRows){
+            for(const row of payload.tableRows){
                 let newRow = {
                     dpName: null,
                     selectedWellModel: 0,
@@ -119,40 +137,40 @@ export default {
                     drainagePointId: 0
                 };
 
-                const existingDP = context.drainagePoints.find(e => e.label === row["Drainage Point"]);
+                const existingDP = context.drainagePoints.find(e => e.label === row[DrainagePoint]);
 
                 if(existingDP){
                 
-                    if(row["Drainage Point"]) newRow.dpName = row["Drainage Point"];
+                    if(row[DrainagePoint]) newRow.dpName = row[DrainagePoint];
                     
-                    if(row["Well Model"]) {
-                        const wellModel = WELLMODELS.find(e => e.label.toLowerCase() == row["Well Model"].toLowerCase());
+                    if(row[WellModel]) {
+                        const wellModel = WELLMODELS.find(e => e.label.toLowerCase() == row[WellModel].toLowerCase());
                         if(wellModel) newRow.selectedWellModel = wellModel.id;
                     }
                     
-                    if(row["Onstream Date"]){
-                        if(row["Onstream Date"] instanceof Date){
-                            newRow.onStreamDate = row["Onstream Date"].toISOString().split('T')[0];
+                    if(row[OnstreamDate]){
+                        if(row[OnstreamDate] instanceof Date){
+                            newRow.onStreamDate = row[OnstreamDate].toISOString().split('T')[0];
                         } else {
-                            const date = new Date(row["Onstream Date"]);
+                            const date = new Date(row[OnstreamDate]);
                             if(!isNaN(date.getTime())) {
                                 newRow.onStreamDate = date.toISOString().split('T')[0];
                             }
                         }
                     }
                     
-                    if(row["Fluid Type"]) {
-                        const fluidType = FLUIDTYPES.find(e => e.label.toLowerCase() == row["Fluid Type"].toLowerCase());
+                    if(row[FluidType]) {
+                        const fluidType = FLUIDTYPES.find(e => e.label.toLowerCase() == row[FluidType].toLowerCase());
                         if(fluidType) newRow.selectedFluidType = fluidType.id;
                     }
                     
-                    if(row["Well Type"]) {
-                        const wellType = WELLTYPES.find(e => e.label.toLowerCase() == row["Well Type"].toLowerCase());
+                    if(row[WellType]) {
+                        const wellType = WELLTYPES.find(e => e.label.toLowerCase() == row[WellType].toLowerCase());
                         if(wellType) newRow.selectedWellType = wellType.id;
                     }
                     
                     newRow.drainagePointId = existingDP.id;
-                    context.payload.push({...newRow});
+                    context.payload.tableRows.push({...newRow});
                 }
             }
 
@@ -194,12 +212,18 @@ export default {
                     variableName:row.name,
                 }
             })
+          
+            const applicationColumnsTemp = [];
+            console.log("unitNamesRecord: ", unitNamesRecord)
             for(let i = 0; i < context.appVariables.length; i++){
-                context.applicationColumns.push({...qSelect})
-                context.applicationColumns[i].id = `Application Column ${i+1}`;
-                context.applicationColumns[i].value =  context.applicationColumns[i].list[i].value;
-                context.applicationColumns[i].sn = i;
+                applicationColumnsTemp.push({...qSelect})
+                applicationColumnsTemp[i].id = `Application Column ${i+1}`;
+                applicationColumnsTemp[i].value =  applicationColumnsTemp[i].list[i].value;
+                applicationColumnsTemp[i].sn = i;
+                applicationColumnsTemp[i].unitOptions = unitNamesRecord[context.appVariables[i].name].inputOptions;
             }
+
+            context.applicationColumns = [...applicationColumnsTemp];
             console.log("context.applicationColumns: ", context.applicationColumns)
         },
         async storeDpConfigs() {

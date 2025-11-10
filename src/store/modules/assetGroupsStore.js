@@ -13,10 +13,13 @@ export const useAssetGroupsStore = defineStore('assetGroupsStore', {
         description: "",
         id: -1,
     },
+    units: [],
+    unitsRecord: {}
   }),
 
   actions: {
     setStateData(variableName, variableValue) {
+      console.log(variableName, variableValue)
       this[variableName] = variableValue;
     },
 

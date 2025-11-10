@@ -31,6 +31,9 @@ const routes = [
       { path: '/drainage-point-constraints-landing', component: () => import('src/pages/data_input/well_modeling/dp_constraints/dp_constraints_landing.vue')},
       { path: '/drainage-point-dca-input-import', component: () => import('src/pages/data_import/well_modeling/dp_dca_input_import.vue')},
       { path: '/drainage-point-dca-input-landing', component: () => import('src/pages/data_input/well_modeling/dp_dca/dp_dca_input_landing.vue')},
+      { path: '/stored-networks', component: () => import('src/pages/assets/stored_networks.vue')},
+      { path: '/business-forecasts', component: () => import('src/pages/business_forecast/landing.vue')},
+      { path: '/run-business-forecast-parameters', component: () => import('src/pages/business_forecast/run_forecast_parameters.vue')},
     ]
   },
 

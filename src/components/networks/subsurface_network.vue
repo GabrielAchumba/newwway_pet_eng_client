@@ -15,6 +15,9 @@
               <div class="col"></div>
               <div class="col-auto">
                 <q-btn-group flat>
+                  <q-btn v-if="!isStoredNetwork" icon="save" @click="openGneratedNetwork" flat>
+                    <q-tooltip>Store Network</q-tooltip>
+                  </q-btn>
                   <q-btn icon="zoom_in" @click="zoomIn" flat>
                     <q-tooltip>Zoom In</q-tooltip>
                   </q-btn>
@@ -63,6 +66,30 @@
                 <img :src="flowstation" alt="Facility" class="legend-color" />
                 <span class="text-caption">Facility</span>
               </div>
+              <div class="legend-item" v-if="showSurfaceAssets">
+                <img :src="centralProcessingFacility" alt="centralProcessingFacility" class="legend-color" />
+                <span class="text-caption">Central Processing Facility</span>
+              </div>
+              <div class="legend-item" v-if="showSurfaceAssets">
+                <img :src="gasProcessingFacility" alt="gasProcessingFacility" class="legend-color" />
+                <span class="text-caption">Gas Processing Facility</span>
+              </div>
+              <div class="legend-item" v-if="showSurfaceAssets">
+                <img :src="pipeline" alt="pipeline" class="legend-color" />
+                <span class="text-caption">Pipeline</span>
+              </div>
+              <div class="legend-item" v-if="showSurfaceAssets">
+                <img :src="dehydrationUnit" alt="dehydrationUnit" class="legend-color" />
+                <span class="text-caption">Dehydration Unit</span>
+              </div>
+              <div class="legend-item" v-if="showSurfaceAssets">
+                <img :src="gasDemand" alt="gasDemand" class="legend-color" />
+                <span class="text-caption">Gas Customer</span>
+              </div>
+              <div class="legend-item" v-if="showSurfaceAssets">
+                <img :src="terminal" alt="terminal" class="legend-color" />
+                <span class="text-caption">FCOT</span>
+              </div>
             </div>
           </q-card-section>
           <!-- Data Status Legend -->
@@ -97,16 +124,34 @@
         />
     </q-dialog>
 
+    <q-dialog v-model="showSaveNetworkForm">
+        <SlotsDialog
+        :dialogTitle="storeNetworkTitle"
+        :toolbarItems="storeNetworkToolbarItems"
+        @toolBarItemClick="storeNetworkDialogToolBarItemClick"
+        >
+      <template v-slot:content>
+        <SaveNetworkForm
+        :isLoading="isStoreNetworkLoading"
+        @updateActiveAssetInput="updateActiveAssetInput"/>
+      </template>
+      </SlotsDialog>
+    </q-dialog>
+
   </q-page>
 </template>
 
 <script>
-import { defineComponent, ref, onMounted, watch } from 'vue';
+import { defineComponent, ref, onMounted, watch, computed } from 'vue';
 import { Network } from 'vis-network';
 import { DataSet } from 'vis-data';
 import { storeToRefs } from 'pinia';
+import { useRouter } from 'vue-router'
 import { useAssetsExplorerStore } from 'src/store/modules/assetsExplorerStore';
 import NetworkActiveDialog from 'src/components/dialogs/network_active_dialog.vue';
+import SlotsDialog from '../dialogs/slots_dialog.vue';
+import SaveNetworkForm from './save_network_form.vue';
+import { storeNetworkRequest } from "../../api_services/network_service";
 
 
 const assetsExplorerStore = useAssetsExplorerStore();
@@ -117,22 +162,63 @@ const Reservoir = 'https://cdn-icons-png.flaticon.com/512/2697/2697226.png';
 const Field = 'https://cdn-icons-png.flaticon.com/512/8084/8084333.png';
 const Well = 'https://cdn-icons-png.flaticon.com/512/2697/2697226.png';
 
+const CentralProcessingFacility = 'https://cdn-icons-png.flaticon.com/512/3342/3342135.png';
+const DehydrationUnit = 'https://cdn-icons-png.flaticon.com/512/3342/3342137.png';
+const GasDemand = 'https://cdn-icons-png.flaticon.com/512/3342/3342138.png';
+const GasProcessingFacility = 'https://cdn-icons-png.flaticon.com/512/3342/3342135.png';
+const Pipeline = 'https://cdn-icons-png.flaticon.com/512/1580/1580750.png';
+const Terminal = 'https://cdn-icons-png.flaticon.com/512/3342/3342136.png';
+
+
 
 export default defineComponent({
   name: 'NetworkVisualization',
   components: {
-    NetworkActiveDialog
+    NetworkActiveDialog,
+    SlotsDialog,
+    SaveNetworkForm
   },
-  setup() {
+  props: {
+    isStoredNetwork:{
+      type: Boolean,
+      default: false
+    },
+    showSurfaceAssets:{
+      type: Boolean,
+      default: false
+    }
+  },
+  setup(props) {
+    const router = useRouter();
     const surfaceNetwork = ref(null);
     const showComponentForm = ref(false);
     const selectedComponent = ref(null);
+    const showSaveNetworkForm = ref(false);
+    const isStoreNetworkLoading = ref(false);
 
     const drainagePoint = ref(DrainagePoint);
     const flowstation = ref(Flowstation);
     const reservoir = ref(Reservoir);
     const field = ref(Field);
     const well = ref(Well);
+
+    const centralProcessingFacility = ref(CentralProcessingFacility);
+    const dehydrationUnit = ref(DehydrationUnit);
+    const gasDemand = ref(GasDemand);
+    const gasProcessingFacility = ref(GasProcessingFacility);
+    const pipeline = ref(Pipeline);
+    const terminal = ref(Terminal);
+
+
+    const isStoredNetwork = computed(() => props.isStoredNetwork);
+    const storeNetworkTitle = ref("Store Network");
+    const storeNetworkToolbarItems = ref([
+      {id: "Save", title: "Save", title2: "Save-Network"}
+    ]);
+    const storeNetworkInput = ref({
+      networkName: "",
+      networkDescription: ""
+    })
 
     const allToolbarItems = ref({
         "Drainage Point": [
@@ -210,6 +296,47 @@ export default defineComponent({
       }
     };
 
+    const openGneratedNetwork = () => {
+      showSaveNetworkForm.value = true;
+      console.log("activeNetworkPayload: ", activeNetworkPayload.value)
+    }
+
+    const saveGeneratedNetwork = async () => {
+     debugger
+      isStoreNetworkLoading.value = true;
+      console.log("activeNetworkPayload: ", activeNetworkPayload.value)
+      console.log("storeNetworkInput.value: ", storeNetworkInput.value)
+      const payload = {
+        ...storeNetworkInput.value,
+        ...activeNetworkPayload.value
+      }
+      console.log("payload: ", payload)
+      const response = await storeNetworkRequest(payload);
+      console.log("response: ", response)
+      showSaveNetworkForm.value = false;
+      isStoreNetworkLoading.value = false;
+
+      router.push('/stored-networks')
+
+    }
+
+    const updateActiveAssetInput = (payload) => {
+
+        console.log(payload)
+        storeNetworkInput.value[payload.variable] = payload.value;
+        console.log("storeNetworkInput.value: ", storeNetworkInput.value)
+
+    };
+
+    const storeNetworkDialogToolBarItemClick = async (payload) => {
+
+      switch (payload) {
+        case "Save-Network":
+          await saveGeneratedNetwork();
+          break;
+      }
+    }
+
     // Function to determine border color based on data completeness
     const getBorderColor = (node) => {
       if (!node.dataStatus) return '#ff0000'; // Red for no data
@@ -255,7 +382,7 @@ export default defineComponent({
     };
 
 
-    const { networkNodes, networkConnections } = storeToRefs(assetsExplorerStore);
+    const { networkNodes, networkConnections, activeNetworkPayload } = storeToRefs(assetsExplorerStore);
 
     // If you have a drawNetwork function
     const drawNetwork = (nodes, connections) => {
@@ -383,15 +510,18 @@ export default defineComponent({
     // Redraw when data changes
     watch([networkNodes, networkConnections], ([nodes, connections]) => {
        
+      debugger
       if (nodes.length && connections.length) {
         drawNetwork(nodes, connections)
       }
-    }, { immediate: true })
+    })
+
+    //, { immediate: true }
         
 
     onMounted(() => {
       
-      console.log("networkNodes.value: ", networkNodes.value)
+        console.log("networkNodes.value: ", networkNodes.value)
         console.log("networkConnections.value: ", networkConnections.value)
 
       if (networkNodes.value.length && networkConnections.value.length) {
@@ -450,6 +580,22 @@ export default defineComponent({
       showComponentForm,
       selectedComponent,
       handleFormSaved,
+      isStoredNetwork,
+      saveGeneratedNetwork,
+      showSaveNetworkForm,
+      openGneratedNetwork,
+      storeNetworkTitle,
+      storeNetworkToolbarItems,
+      storeNetworkDialogToolBarItemClick,
+      storeNetworkInput,
+      updateActiveAssetInput,
+      isStoreNetworkLoading,
+      centralProcessingFacility,
+      dehydrationUnit,
+      gasDemand,
+      gasProcessingFacility,
+      pipeline,
+      terminal,
     };
   }
 });

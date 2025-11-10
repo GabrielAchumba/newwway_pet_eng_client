@@ -73,12 +73,13 @@
 <script setup>
 import { storeToRefs } from 'pinia';
 import { ref, computed, watch, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 import { useAssetsExplorerStore } from 'src/store/modules/assetsExplorerStore';
 import { useAssetGroupsStore } from 'src/store/modules/assetGroupsStore';
 import { fetchAssetsByCategory, generateNetwork } from 'src/api_services/assets_service';
 import { fetchAssetGroups } from 'src/api_services/asset_groups';
 import { findLiftCurvesNamesPerDrainagePoint } from 'src/api_services/well_modeling';
+import { fetchStoredNetworks, drawStoredAssetsNetwork } from '../../api_services/network_service';
 import { 
   getSurfaceNodes,
   getConnections
@@ -87,6 +88,7 @@ import {
 const assetsExplorerStore = useAssetsExplorerStore();
 const assetGroupsStore = useAssetGroupsStore();
 const router = useRouter();
+const route = useRoute();
 
 
 const { assetExplorerTitle, listItems, isCheckBoxActive, isAssetCategorySelector } = storeToRefs(assetsExplorerStore);
@@ -177,7 +179,38 @@ async function selectItem(index) {
         id: listItems.value[index].id,
       });
       break;
+    case '/stored-networks':
+      const selectedAssetGroupId = assetGroupsStore.selectedAssetGroup.id;
+      const networkName = listItems.value[index].label;
+      await drawStoredNetwork(selectedAssetGroupId, networkName);
+      break;
   }
+}
+
+async function drawStoredNetwork(selectedAssetGroupId, networkName) {
+  
+      console.log("networkName: ", networkName);
+      console.log("selectedAssetGroupId: ", selectedAssetGroupId);
+      const networkResponse  = await drawStoredAssetsNetwork(selectedAssetGroupId, networkName);
+      console.log("networkResponse: ", networkResponse)
+
+      //if(networkResponse.status === 200 || networkResponse.status === 201) {
+
+      const { equipmentConnections, equipmentNameImages } = networkResponse;
+
+      const surfaceNodes = getSurfaceNodes(equipmentConnections, equipmentNameImages);
+
+      const connections = getConnections(equipmentConnections);
+
+      console.log("surfaceNodes: ", surfaceNodes);
+      console.log("connections: ", connections);
+      
+
+      assetsExplorerStore.setStateData("networkNodes", surfaceNodes);
+      assetsExplorerStore.setStateData("networkConnections", connections);
+      assetsExplorerStore.setStateData("activeNetworkPayload", payload);
+
+    //}
 }
 
 function onAssetCategoryChanged(_selectedCategory) {
@@ -222,9 +255,9 @@ async function onCheckboxChanged() {
 
       assetsExplorerStore.setStateData("networkNodes", surfaceNodes);
       assetsExplorerStore.setStateData("networkConnections", connections);
+      assetsExplorerStore.setStateData("activeNetworkPayload", payload);
 
     }
-    //
 
   }else{
     assetsExplorerStore.setStateData("networkNodes", []);
@@ -250,7 +283,7 @@ function onAdd() {
 function onImport() {
 
    switch(router.currentRoute._value.fullPath){
-    case 'subsurface-assets-landing':
+    case '/subsurface-assets-landing':
       router.push('/import-subsurface-assets');
       break;
     case '/well-lift-curves-landing':
@@ -271,8 +304,11 @@ function onImport() {
 function onNetwork() {
 
    switch(router.currentRoute._value.fullPath){
-    case 'subsurface-assets-landing':
+    case '/subsurface-assets-landing':
       router.push('/network-diagram')
+      break;
+    case '/import-subsurface-assets':
+      router.push('/subsurface-assets-landing')
       break;
     case '/lift-curves-import':
       router.push('/well-lift-curves-landing');
@@ -364,12 +400,35 @@ async function getAssetGroups() {
         assetCategorySelectorReadOnly.value = true;
         fetchAssets('drainagePoints', selectedAssetGroupId);
         break;
+      // case '/stored-networks':
+      //   assetCategorySelectorReadOnly.value = true;
+      //   fetchStoredNetworks(selectedAssetGroupId);
+      //   break;
     }
 }
 
 watch(listItems, (val) => {
   //console.log('listItems changed:', val)
 }, { immediate: true })
+
+watch(
+    () => route.fullPath,
+    async (newPath, oldPath) => {
+      console.log('Route changed from:', oldPath, 'to:', newPath)
+      const selectedAssetGroupId = assetGroupsStore.selectedAssetGroup.id;
+      if(newPath === '/stored-networks'){
+        assetCategorySelectorReadOnly.value = true;
+        const response = await fetchStoredNetworks(selectedAssetGroupId);
+        console.log("response: ", response)
+        assetsExplorerStore.setStateData("listItems", response.map((row=>({
+            ...row,
+            label: row.networkName,
+            checked: false
+            }))));
+      }
+    },
+    { immediate: true }
+  )
 
 onMounted(async () => {
 

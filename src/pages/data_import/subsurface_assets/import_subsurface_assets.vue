@@ -50,6 +50,16 @@ import { useAssetsExplorerStore } from 'src/store/modules/assetsExplorerStore';
 import { useAssetGroupsStore } from 'src/store/modules/assetGroupsStore';
 import { useRouter } from 'vue-router'
 import { fetchAssets, createAssets } from "src/api_services/assets_service";
+import { unitNamesRecord } from "../../../units_quantities/unitNames";
+import {
+    Facility,
+    Field,
+    Reservoir,
+    Well,
+    String,
+    WellString,
+    DrainagePoint
+} from "../../../units_quantities/unitNames";
 
 const authStore = useAuthStore();
 const router = useRouter();
@@ -101,13 +111,13 @@ export default {
         }
     },
     methods:{
-        Create(tableRows){
+        Create(payload){
             const context = this;
-            context.tableRows = tableRows;
+            context.tableRows = payload.tableRows;
 
             console.log(context.assetGroups);
             console.log(context.selectedAssetGroup);
-             console.log(tableRows);
+             console.log(context.tableRows);
 
              context.payload = {
                 wells: [],
@@ -121,14 +131,15 @@ export default {
             
             context.payload.AssetGroupId = assetGroupsStore.selectedAssetGroup.id;
 
-            for(const row of tableRows){
-                if(row["Facility"]) context.payload.facilities.push({name: row["Facility"], description: row["Facility"]});
-                if(row["Field"]) context.payload.fields.push({name: row["Field"], description: row["Field"]});
-                if(row["Reservoir"]) context.payload.reservoirs.push({name: row["Reservoir"], description: row["Reservoir"]});
-                if(row["Well"]) context.payload.wells.push({ name: row["Well"], description: row["Well"]});
-                if(row["String"]) context.payload.productionStrings.push({name: row["String"], description: row["String"]});
-                if(row["WellString"]) context.payload.wellProductionStrings.push({name: row["WellString"], description: row["WellString"]});
-                if(row["Drainage Point"]) context.payload.drainagePoints.push({name: row["Drainage Point"], description: row["Drainage Point"]});
+
+            for(const row of context.tableRows){
+                if(row[Facility]) context.payload.facilities.push({name: row[Facility], description: row[Facility]});
+                if(row[Field]) context.payload.fields.push({name: row[Field], description: row[Field]});
+                if(row[Reservoir]) context.payload.reservoirs.push({name: row[Reservoir], description: row[Reservoir]});
+                if(row[Well]) context.payload.wells.push({ name: row[Well], description: row[Well]});
+                if(row[String]) context.payload.productionStrings.push({name: row[String], description: row[String]});
+                if(row[WellString]) context.payload.wellProductionStrings.push({name: row[WellString], description: row[WellString]});
+                if(row[DrainagePoint]) context.payload.drainagePoints.push({name: row[DrainagePoint], description: row[DrainagePoint]});
             }
 
             var i = -1;
@@ -189,12 +200,18 @@ export default {
                     variableName:row.name,
                 }
             })
+
+
+            const applicationColumnsTemp = [];
             for(let i = 0; i < context.appVariables.length; i++){
-                context.applicationColumns.push({...qSelect})
-                context.applicationColumns[i].id = `Application Column ${i+1}`;
-                context.applicationColumns[i].value =  context.applicationColumns[i].list[i].value;
-                context.applicationColumns[i].sn = i;
+                applicationColumnsTemp.push({...qSelect})
+                applicationColumnsTemp[i].id = `Application Column ${i+1}`;
+                applicationColumnsTemp[i].value =  applicationColumnsTemp[i].list[i].value;
+                applicationColumnsTemp[i].sn = i;
+                applicationColumnsTemp[i].unitOptions = unitNamesRecord[context.appVariables[i].name].inputOptions;
             }
+
+            context.applicationColumns = [...applicationColumnsTemp];
             console.log("context.applicationColumns: ", context.applicationColumns)
         },
         async storeAssets() {

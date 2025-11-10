@@ -63,6 +63,13 @@
                 @onQSelectItemValueChanged="onDataTypeChanged"
               />
             </q-td>
+
+            <q-td key="dataUnit" :props="props">
+              <NSelect
+                :qSelect="props.row.dataUnit"
+                @onQSelectItemValueChanged="onDataUnitChanged"
+              />
+            </q-td>
           </q-tr>
         </template>
       </q-table>
@@ -81,7 +88,8 @@ export default {
     applicationColumns: { type: Array, default: () => [] },
     worksheetColumns: { type: Array, default: () => [] },
     dataTypes: { type: Array, default: () => [] },
-    worksheetQSelects: { type: Array, default: () => [] }
+    worksheetQSelects: { type: Array, default: () => [] },
+    dataUnits: { type: Array, default: () => [] },
   },
   computed: {
     rows() {
@@ -91,13 +99,29 @@ export default {
         applicationColumn,
         worksheetColumn: this.worksheetColumns[i],
         dataType: this.dataTypes[i],
+        dataUnit: this.dataUnits[i],
       }));
     },
     columns() {
       return [
         { name: "applicationColumn", label: "Application Column", field: "applicationColumn", align: "left", headerClasses: 'bg-secondary text-white' },
         { name: "worksheetColumn", label: "Worksheet Column", field: "worksheetColumn", align: "left", headerClasses: 'bg-secondary text-white' },
-        { name: "dataType", label: "Data Type", field: "dataType", align: "left", headerClasses: 'bg-secondary text-white' },
+        { 
+          name: "dataType", 
+          label: "Data Type", 
+          field: "dataType", 
+          align: "left", 
+          headerClasses: 'bg-secondary text-white', 
+          headerStyle: 'min-width: 200px; max-width: 300px;',
+        },
+        { 
+          name: "dataUnit", 
+          label: "Unit", 
+          field: "dataUnit", 
+          align: "left", 
+          headerClasses: 'bg-secondary text-white', 
+          headerStyle: 'min-width: 200px; max-width: 300px;',
+        },
       ];
     },
   },
@@ -110,6 +134,9 @@ export default {
     },
     onDataTypeChanged(_qSelect) {
       this.$emit("onDataTypeChanged", _qSelect);
+    },
+    onDataUnitChanged(_qSelect) {
+      this.$emit("onDataUnitChanged", _qSelect);
     },
     onToggle(event) {
       this.$emit("onToggle", event);

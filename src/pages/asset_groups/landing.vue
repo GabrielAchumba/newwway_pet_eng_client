@@ -36,14 +36,16 @@
                   stack-label
                   bg-color="card-bg"
                   color="secondary"
-                  style="height: 50vh;"
+                  autogrow
                 />
               </div>
             </q-card-section>
           </q-card>
         </div>
 
-        <UnitsConfig class="col-sm-12 col-xs-12 col-md-8 col-lg-8 col-xl-8"/>
+        <UnitsConfig class="col-sm-12 col-xs-12 col-md-8 col-lg-8 col-xl-8"
+        @updateEditableTable ="updateEditableTable"
+        :rows="units"/>
 
         <!-- <div class="col-sm-12 col-xs-12 col-md-8 col-lg-8 col-xl-8">
           <UnitsConfig/>
@@ -70,7 +72,8 @@
 </template>
 
 <script>
-import { ref, computed, onMounted, reactive  } from 'vue';
+import { storeToRefs } from 'pinia';
+import { ref, computed, onMounted, reactive, watch  } from 'vue';
 import { usePropertyGridStore } from 'src/store/modules/propertyGridStore';
 import { useAssetsExplorerStore } from 'src/store/modules/assetsExplorerStore';
 import { useAssetGroupsStore } from 'src/store/modules/assetGroupsStore';
@@ -80,6 +83,8 @@ import CustomDialog from "src/components/dialogs/CustomDialog.vue";
 import { dialogsAssetGroupsLanding } from "./view_models/landing_vm";
 import { createAssetGroup } from "src/api_services/asset_groups";
 import UnitsConfig from "./units_config.vue";
+import { fetchUnits } from "../../api_services/unit_system_service";
+import { unitNames } from '../../units_quantities/unitNames';
 
 
 export default {
@@ -96,7 +101,8 @@ export default {
 
     // Computed property
     const items = computed(() => assetsExplorerStore.listItems);
-    const selectedAssetGroup = computed(() => assetGroupsStore.selectedAssetGroup);
+    //const selectedAssetGroup = computed(() => assetGroupsStore.selectedAssetGroup);
+    const { selectedAssetGroup } = storeToRefs(assetGroupsStore);
     const dialogs = ref([...dialogsAssetGroupsLanding]);
     const pageTitle = ref("Asset-group & Units")
     
@@ -109,14 +115,46 @@ export default {
         assetGroupsStore.setStateData("selectedAssetGroup", payload);
     }
 
+    const units = ref(unitNames.map((row, idx)=> {
+            return {
+                id: idx,
+                unitName: row.unitName,
+                input: 0,
+                output: 0,
+                columsOptions:{
+                    input: row.inputOptions,
+                    output: row.outputOptions,
+                },
+                quantity: row.quantity,
+                unitId: 0
+            }
+        }));
+
     const storeAssetGroup = async () => {
+
         const payload = {
+          assetGroup: {
             name: selectedAssetGroup.value.assetGroupName,
-            description: selectedAssetGroup.value.assetGroupDescription
-        };
+            description: selectedAssetGroup.value.assetGroupDescription,
+            id: selectedAssetGroup.value.id
+          },
+          units: [...units.value]
+        }
         const response = await createAssetGroup(payload);
         if(response.status == 200 || response.status == 201){
             await getAssetGroups();
+            const unitsRecord = units.value.reduce((acc, unit) => {
+              acc[unit.unitName] = {
+                  unitId: unit.unitId,
+                  unitName: unit.unitName,
+                  input: unit.input,
+                  output: unit.output,
+                  quantity: unit.quantity
+              };
+              return acc;
+            }, {});
+
+            assetGroupsStore.setStateData("unitsRecord", unitsRecord);
             dialogs.value[0].isVisible = false;
             dialogs.value[1].isVisible = true;
         }else{
@@ -141,6 +179,13 @@ export default {
             }
         }
     }
+
+    const updateEditableTable = (payload) => {
+
+      units.value = [...payload];
+      console.log("units.value: ", units.value)
+      
+    };
 
     const LoadSelectedAssetGroupData = () => {
       
@@ -246,6 +291,92 @@ export default {
       },
     ])
 
+    const fetchUnitsByAssetGroupId = async (assetGroupId) => {
+
+      const response = await fetchUnits(assetGroupId);
+      console.log("fetchUnits: ", response)
+
+      if(response.length <= 0) {
+        units.value = unitNames.map((row, idx)=> {
+            return {
+                id: idx,
+                unitName: row.unitName,
+                input: 0,
+                output: 0,
+                columsOptions:{
+                    input: row.inputOptions,
+                    output: row.outputOptions,
+                },
+                quantity: row.quantity,
+                unitId: 0
+            }
+        });
+         assetGroupsStore.setStateData("units", [...units.value]);
+        return;
+      }
+
+      units.value = unitNames.map((row, idx)=> {
+
+        if(idx < response.length){
+          return {
+                id: idx,
+                unitName: row.unitName,
+                input: response[idx].input,
+                output: response[idx].output,
+                columsOptions:{
+                    input: row.inputOptions,
+                    output: row.outputOptions,
+                },
+                quantity: row.quantity,
+                unitId: response[idx].unitId,
+            }
+        }else{
+          return {
+                id: idx,
+                unitName: row.unitName,
+                input: row.input,
+                output: row.output,
+                columsOptions:{
+                    input: row.inputOptions,
+                    output: row.outputOptions,
+                },
+                quantity: row.quantity,
+                unitId: row.unitId,
+            }
+        }
+      })
+
+        console.log("units.value: ", units.value)
+        assetGroupsStore.setStateData("units", [...units.value]);
+
+        const unitsRecord = units.value.reduce((acc, unit) => {
+        acc[unit.unitName] = {
+            unitId: unit.unitId,
+            unitName: unit.unitName,
+            input: unit.input,
+            output: unit.output,
+            quantity: unit.quantity
+        };
+        return acc;
+        }, {});
+
+        assetGroupsStore.setStateData("unitsRecord", unitsRecord);
+    }
+
+    // watch(() => selectedAssetGroup, async (newVal) => {
+    
+    //   console.log("newVal: ", newVal)
+    //   await fetchUnitsByAssetGroupId(newVal.value.id);
+
+    // }, { deep: true, immediate: true })
+
+    watch(() => selectedAssetGroup.value?.id, async (newId) => {
+      if (newId) {
+        console.log("newId: ", newId)
+        await fetchUnitsByAssetGroupId(newId);
+      }
+    }, { deep: true, immediate: true });
+
     // Lifecycle hook
     onMounted(async ()  => {
 
@@ -279,7 +410,9 @@ export default {
       cancelDialog,
       okDialog,
       LoadSelectedAssetGroupData,
-      pageTitle
+      pageTitle,
+      updateEditableTable,
+      units
     }
   }
 }

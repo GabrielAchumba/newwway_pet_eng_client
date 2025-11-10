@@ -1,9 +1,19 @@
+import {
+    DrainagePoint,
+    WellModel,
+    OnstreamDate,
+    WellType,
+    FluidType
+} from "../../../../units_quantities/unitNames";
+
+
+
 export const dpConfigHeaders = [
-    {name2: "Drainage Point", name: "Drainage Point", title: "Drainage Point"},
-    {name2: "Well Model", name: "Well Model", title: "Well Model"},
-    {name2: "Onstream Date", name: "Onstream Date", title: "Onstream Date"},
-    {name2: "Fluid Type", name: "Fluid Type", title: "Fluid Type"},
-    {name2: "Well Type", name: "Well Type", title: "Well Type"},
+    {name2: DrainagePoint, name: DrainagePoint, title: DrainagePoint},
+    {name2: WellModel, name: WellModel, title: WellModel},
+    {name2: OnstreamDate, name: OnstreamDate, title: OnstreamDate},
+    {name2: FluidType, name: FluidType, title: FluidType},
+    {name2: WellType, name: WellType, title: WellType},
 ]
 
 export const dialogsDpConfigImport = [

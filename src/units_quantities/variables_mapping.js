@@ -1,10 +1,12 @@
 export const variable_map = {
     lgr: "lgr",
-    glr: "gor",
+    glr: "glr",
     liquidRate: "liquidRate",
     gasRate: "gasRate",
     liquidVolume: "liquidVolume",
     gasVolume: "gasVolume",
-    declineRate: "declineRate"
-
+    declineRate: "declineRate",
+    untiless: "untiless",
+    waterCut: "waterCut",
+    pressure: "pressure"
 };

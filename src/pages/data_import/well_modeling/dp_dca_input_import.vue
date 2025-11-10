@@ -52,6 +52,22 @@ import { useAssetGroupsStore } from 'src/store/modules/assetGroupsStore';
 import { useRouter } from 'vue-router'
 import { createBulkDCAInput } from "src/api_services/drainage_point_input";
 import { DECLINEMETHODS } from "src/constants/asset_models";
+import { 
+    unitNamesRecord,
+    DrainagePoint,
+    FluidType,
+    CumulativeOilProduction,
+    CumulativeGasProduction,
+    UltimateOilRecovery,
+    UltimateGasRecovery,
+    PlateauPeriod,
+    DCAMethod,
+    DeclineRate,
+    GORRateofChange,
+    CGRRateofChange,
+    WatercutRateofChange,
+    WGRRateofChange,
+} from "../../../units_quantities/unitNames";
 
 const authStore = useAuthStore();
 const router = useRouter();
@@ -91,24 +107,33 @@ export default {
             applicationColumns: [],
             dialogs: dialogsDpDCAInputImport,
             tableRows: [],
+            tableColumnUnits: [],
             isImportComplete: false,
             productionHistoryCollection: [],
-            payload: [],
+            payload: {
+               tableColumnUnits: [],
+               tableRows: []
+            },
             drainagePoints: []
         }
     },
     methods:{
-        Create(tableRows){
+        Create(payload){
             const context = this;
-            context.tableRows = tableRows;
+            context.tableRows = payload.tableRows;
+            context.tableColumnUnits = payload.tableColumnUnits;
 
             console.log(context.assetGroups);
             console.log(context.selectedAssetGroup);
-             console.log(tableRows);
+            console.log(payload.tableRows);
+            console.log(payload.tableColumnUnits);
 
-             context.payload = [];
+             context.payload = {
+                tableColumnUnits: [...payload.tableColumnUnits],
+                tableRows: []
+             };
 
-            for(const row of tableRows){
+            for(const row of payload.tableRows){
                 let newRow = {
                    initialCumProd: null,
                     ultimateRecovery: null,
@@ -121,38 +146,50 @@ export default {
                     drainagePointId: 0
                 };
 
-                const existingDP = context.drainagePoints.find(e => e.label === row["Drainage Point"]);
+                const existingDP = context.drainagePoints.find(e => e.label === row[DrainagePoint]);
 
                 if(existingDP){
 
                     let fluidType = "oil";
-                    if(row["Fluid Type"]) {
-                        if(row["Fluid Type"].toLowerCase() === "gas") fluidType = "gas";
+                    if(row[FluidType]) {
+                        if(row[FluidType].toLowerCase() === "gas") fluidType = "gas";
                     }
 
                     if(fluidType === "oil"){
-                        if(row["Initial Cumulative Oil Production"]) newRow.initialCumProd = Number(row["Initial Cumulative Oil Production"]);
-                        if(row["Oil Ultimate Recovery"]) newRow.ultimateRecovery = Number(row["Oil Ultimate Recovery"]);
+                        if(row[CumulativeOilProduction]) newRow.initialCumProd = Number(row[CumulativeOilProduction]);
+                        if(row[UltimateOilRecovery]) newRow.ultimateRecovery = Number(row[UltimateOilRecovery]);
                     }else{
-                        if(row["Initial Cumulative Gas Production"]) newRow.initialCumProd = Number(row["Initial Cumulative Gas Production"]);
-                        if(row["Gas Ultimate Recovery"]) newRow.ultimateRecovery = Number(row["Gas Ultimate Recovery"]);
+                        if(row[CumulativeGasProduction]) newRow.initialCumProd = Number(row[CumulativeGasProduction]);
+                        if(row[UltimateGasRecovery]) newRow.ultimateRecovery = Number(row[UltimateGasRecovery]);
                     }
 
-                    if(row['Plateau Period']) newRow.plateauPeriod = Number(row['Plateau Period']);
-                    if(row["Rate Decline Rate"]) newRow.rateDeclineRate = Number(row["Rate Decline Rate"]);
-                    if(row["GOR/CGR Rate of Change"]) newRow.gasFractionDeclineRate = Number(row["GOR/CGR Rate of Change"]);
-                    if(row["BSW/WGR Rate of Change"]) newRow.waterFractionDeclineRate = Number(row["BSW/WGR Rate of Change"]);
+                    if(row[PlateauPeriod]) newRow.plateauPeriod = Number(row[PlateauPeriod]);
+                    if(row[DeclineRate]) newRow.rateDeclineRate = Number(row[DeclineRate]);
 
-                    if(row['DCA Method']) {
-                        const declineMethod = DECLINEMETHODS.find(e => e.label.toLowerCase() == row['DCA Method'].toLowerCase());
+                    if(fluidType === "oil"){
+                        newRow.gasFractionDeclineRate = row[GORRateofChange] ? Number(row[GORRateofChange]) : null;
+                    }else{
+                        newRow.gasFractionDeclineRate = row[CGRRateofChange] ? Number(row[CGRRateofChange]) : null;
+                    }
+
+                    if(fluidType === "oil"){
+                        newRow.waterFractionDeclineRate = row[WatercutRateofChange] ? Number(row[WatercutRateofChange]) : null;
+                    }else{
+                        newRow.waterFractionDeclineRate = row[WGRRateofChange] ? Number(row[WGRRateofChange]) : null;
+                    }
+
+                    if(row[DCAMethod]) {
+                        const declineMethod = DECLINEMETHODS.find(e => e.label.toLowerCase() == row[DCAMethod].toLowerCase());
                         if(declineMethod) newRow.selectedDeclineMethod = declineMethod.id;
                         else newRow.selectedDeclineMethod = 1;
                     }
                     
                     newRow.drainagePointId = existingDP.id;
-                    context.payload.push({...newRow});
+                    context.payload.tableRows.push({...newRow});
                 }
             }
+
+            console.log("context.payload: ", context.payload)
 
             var i = -1;
             for(const dialog of context.dialogs){
@@ -192,12 +229,18 @@ export default {
                     variableName:row.name,
                 }
             })
+          
+            const applicationColumnsTemp = [];
+            console.log("unitNamesRecord: ", unitNamesRecord)
             for(let i = 0; i < context.appVariables.length; i++){
-                context.applicationColumns.push({...qSelect})
-                context.applicationColumns[i].id = `Application Column ${i+1}`;
-                context.applicationColumns[i].value =  context.applicationColumns[i].list[i].value;
-                context.applicationColumns[i].sn = i;
+                applicationColumnsTemp.push({...qSelect})
+                applicationColumnsTemp[i].id = `Application Column ${i+1}`;
+                applicationColumnsTemp[i].value =  applicationColumnsTemp[i].list[i].value;
+                applicationColumnsTemp[i].sn = i;
+                applicationColumnsTemp[i].unitOptions = unitNamesRecord[context.appVariables[i].name].inputOptions;
             }
+
+            context.applicationColumns = [...applicationColumnsTemp];
             console.log("context.applicationColumns: ", context.applicationColumns)
         },
         async storeDpDCAData() {

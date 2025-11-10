@@ -11,7 +11,8 @@ export const useAssetsExplorerStore = defineStore('assetsExplorerStore', {
     networkNodes: [],
     networkConnections: [],
     assetGroupId: 0, 
-    assetId: 0
+    assetId: 0,
+    activeNetworkPayload: {}
   }),
 
   actions: {

@@ -37,9 +37,9 @@ const propertyGridStore = usePropertyGridStore();
 const assetsExplorerStore = useAssetsExplorerStore();
 
 const dataCards = reactive([
-          { title: 'Subsurface Assets', description: 'View, import, edit, delete subsurface assets', image: DailyOilProductionImage, route: '/subsurface-assets-landing' },
-          { title: 'Surface Assets', description: 'View, import, edit, delete surface assets', image: DailyOilProductionImage, route: "b" },
-          { title: 'Stored Networks', description: 'View, import, edit, delete stored networks', image: DailyOilProductionImage, route: '/stored-networks' },
+          { title: 'Run Forecast', description: 'Set up forecast parameters and run forecast', image: DailyOilProductionImage, route: '/run-business-forecast-parameters' },
+          { title: 'Forecast Results Reporting', description: 'View and export stored forecast results', image: DailyOilProductionImage, route: "b" },
+          { title: 'Forecast Results Vizualization', description: 'Chart plotting of stored forecast results', image: DailyOilProductionImage, route: 'b' },
         ]);
 
 
@@ -57,7 +57,7 @@ function navigateTo(route) {
 onMounted(() => {
   propertyGridStore.SetIsPropertyGridActivated(false);
   assetsExplorerStore.SetIsAssetsExplorerActivated(false);
-  assetsExplorerStore.setIsAssetCategorySelector(true)
+  assetsExplorerStore.setIsAssetCategorySelector(false)
 });
 </script>
 

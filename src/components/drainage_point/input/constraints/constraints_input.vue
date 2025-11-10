@@ -11,6 +11,7 @@
 <script>
 import { defineComponent, ref, watch } from 'vue';
 import Table from '../../../tables/TableEditable4.vue';
+import { unitNamesRecord } from "../../../../units_quantities/unitNames";
 
 export default defineComponent({
   name: 'DPConstraints',
@@ -56,11 +57,11 @@ export default defineComponent({
             isEditable: true
         },
         {
-            name: 'abandonmentUnit',
+            name: 'abandonmentUnit2',
             required: false,
             label: 'Unit',
             align: 'left',
-            field: row => row.abandonmentUnit,
+            field: row => row.abandonmentUnit2,
             sortable: true,
             headerClasses: 'text-primary bg-secondary',
             variableType: null,
@@ -68,7 +69,33 @@ export default defineComponent({
         }
       ]);
 
-    const rows = ref(props.activeDrainagePoint.Constraints);
+    const rows = ref(props.activeDrainagePoint.Constraints ? props.activeDrainagePoint.Constraints.map((row, idx) => {
+
+        //const numericValue = Number(row.abandonmentValue);
+        const abandonmentUnit = row.abandonmentUnit ?? 0;
+        console.log("numericValue: ", row.abandonmentValue, idx)
+        const unitNameRecord = unitNamesRecord[row.abandonmentCondtion]
+        const inputOptions = unitNameRecord.inputOptions;
+        const unitOption = inputOptions.find(e => e.id == abandonmentUnit);
+
+        if (row.abandonmentValue) {
+            return {
+                constraintId: row?.constraintId || null,
+                abandonmentCondtion: row.abandonmentCondtion,
+                abandonmentValue: row.abandonmentValue,
+                abandonmentUnit: row.abandonmentUnit || null,
+                abandonmentUnit2: unitOption.label
+            }
+        } else {
+            return {
+                constraintId: row?.constraintId || null,
+                abandonmentCondtion: row.abandonmentCondtion,
+                abandonmentValue: null,
+                abandonmentUnit: row.abandonmentUnit || null,
+                abandonmentUnit2: unitOption.label
+            }
+        }
+      }) : []);
 
 
     const updateEditableTable = (payload) => {
@@ -85,21 +112,27 @@ export default defineComponent({
       rows.value = newVal?.Constraints ?  newVal?.Constraints.map((row, idx) => {
 
         //const numericValue = Number(row.abandonmentValue);
+        const abandonmentUnit = row.abandonmentUnit ?? 0;
         console.log("numericValue: ", row.abandonmentValue, idx)
+        const unitNameRecord = unitNamesRecord[row.abandonmentCondtion]
+        const inputOptions = unitNameRecord.inputOptions;
+        const unitOption = inputOptions.find(e => e.id == abandonmentUnit);
 
         if (row.abandonmentValue) {
             return {
                 constraintId: row?.constraintId || null,
                 abandonmentCondtion: row.abandonmentCondtion,
                 abandonmentValue: row.abandonmentValue,
-                abandonmentUnit: row.abandonmentUnit?.trim() || "",
+                abandonmentUnit: row.abandonmentUnit || null,
+                abandonmentUnit2: unitOption.label
             }
         } else {
             return {
                 constraintId: row?.constraintId || null,
                 abandonmentCondtion: row.abandonmentCondtion,
                 abandonmentValue: null,
-                abandonmentUnit: row.abandonmentUnit?.trim() || "",
+                abandonmentUnit: row.abandonmentUnit || null,
+                abandonmentUnit2: unitOption.label
             }
         }
       }) : [];

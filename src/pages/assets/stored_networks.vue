@@ -1,11 +1,13 @@
 <template>
-  <NetworkVisualization 
+
+  <SubsurfaceNetwork
   :isStoredNetwork="isStoredNetwork"
   :showSurfaceAssets="showSurfaceAssets"/>
+
 </template>
 
 <script>
-import NetworkVisualization from '../../components/networks/subsurface_network.vue';
+import SubsurfaceNetwork from '../../components/networks/subsurface_network.vue';
 import { usePropertyGridStore } from 'src/store/modules/propertyGridStore';
 import { useAssetsExplorerStore } from 'src/store/modules/assetsExplorerStore';
 
@@ -13,24 +15,26 @@ const propertyGridStore = usePropertyGridStore();
 const assetsExplorerStore = useAssetsExplorerStore();
 
 export default {
-  name: 'NetworkDiagram',
+  name: 'StoredNetwork',
   computed() {
 
   },
   data(){
     return {
-      isStoredNetwork: false,
-      showSurfaceAssets: false,
+        isStoredNetwork: true,
+        showSurfaceAssets: true,
     }
   },
   components: {
-    NetworkVisualization
+    SubsurfaceNetwork,
   },
   created(){
     propertyGridStore.SetIsPropertyGridActivated(false);
     assetsExplorerStore.SetIsAssetsExplorerActivated(true);
-    assetsExplorerStore.setIsAssetCategorySelector(true);
-    assetsExplorerStore.setStateData("isCheckBoxActive", true);
+    assetsExplorerStore.setIsAssetCategorySelector(false);
+    assetsExplorerStore.setStateData("isCheckBoxActive", false);
+    assetsExplorerStore.setStateData("assetExplorerTitle", 'Stored Networks'); 
+
   }
 };
 </script>

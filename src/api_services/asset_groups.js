@@ -16,6 +16,14 @@ export const fetchAssetGroups = async () => {
     return response.data;
 }
 
+
+export const fetchAssetGroupById = async (id) => {
+
+    var response = await get({url: `asset-groups/${id}`});
+    //console.log(response)
+    return response.data;
+}
+
 export const createAssetGroup = async (newAssetGroup)  => {
     
     try {

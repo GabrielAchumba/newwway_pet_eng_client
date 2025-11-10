@@ -8,7 +8,7 @@
         <div class="grid-container inflow-performance-grid">
           <q-input
             :model-value="initialCumProd"
-            label="Initial Cumulative Production"
+            :label="initialCumulativeProductionLabel"
             outlined
             class="form-item"
             type="number"
@@ -16,7 +16,7 @@
           />
           <q-input
             :model-value="ultimateRecovery"
-            label="Ultimate Recovery"
+            :label="ultimateRecoveryLabel"
             outlined
             class="form-item"
             type="number"
@@ -46,7 +46,7 @@
           />
           <q-input
             :model-value="rateDeclineRate"
-            label="Decline Rate"
+            :label="rateDeclineRateLabel"
             outlined
             class="form-item"
             type="number"
@@ -54,7 +54,7 @@
           />
           <q-input
             :model-value="gasFractionDeclineRate"
-            label="GOR Rate of Change"
+            :label="gasFractionDeclineRateLabel"
             outlined
             class="form-item"
             type="number"
@@ -62,7 +62,7 @@
           />
           <q-input
             :model-value="waterFractionDeclineRate"
-            label="Watercut Rate of Change"
+            :label="waterFractionDeclineRateLabel"
             outlined
             class="form-item"
             type="number"
@@ -76,9 +76,25 @@
 </template>
 
 <script>
+import { storeToRefs } from 'pinia';
 import { ref, watch } from 'vue'
 import { useQuasar } from 'quasar'
 import { DECLINEMETHODS } from '../../../../constants/asset_models';
+import { useAssetGroupsStore } from 'src/store/modules/assetGroupsStore';
+import { liquidVolume } from "../../../../units_quantities/liquidVolume";
+import {gasVolume} from "../../../../units_quantities/gasVolume";
+import {declineRate} from "../../../../units_quantities/declineRate";
+import { 
+  CumulativeOilProduction,
+  CumulativeGasProduction,
+  UltimateGasRecovery,
+  UltimateOilRecovery,
+  DeclineRate,
+  GORRateofChange,
+  CGRRateofChange,
+  WatercutRateofChange,
+  WGRRateofChange
+} from "../../../../units_quantities/unitNames";
 
 export default {
   name: 'DrainagePointDCAInput',
@@ -95,7 +111,15 @@ export default {
  emits: ['updateActiveAssetInput'],
   setup(props, { emit }) {
     const $q = useQuasar()
+    debugger;
+
+    const assetGroupsStore = useAssetGroupsStore();
     console.log("props.selectedComponent: ", props.selectedComponent);
+    console.log("assetGroupsStore: ", assetGroupsStore);
+
+    const { units, unitsRecord } = storeToRefs(assetGroupsStore);
+    console.log("units: ", units.value);
+    console.log("unitsRecord: ", unitsRecord.value);
 
     const initialCumProd = ref(props.activeDrainagePoint.DCA?.initialCumProd)
     const ultimateRecovery = ref(props.activeDrainagePoint.DCA?.ultimateRecovery)
@@ -105,6 +129,26 @@ export default {
     const rateDeclineRate = ref(props.activeDrainagePoint.DCA?.rateDeclineRate)
     const gasFractionDeclineRate = ref(props.activeDrainagePoint.DCA?.gasFractionDeclineRate)
     const waterFractionDeclineRate = ref(props.activeDrainagePoint.DCA?.waterFractionDeclineRate)
+
+    const selectedFluidType = ref(props.activeDrainagePoint.Configure?.selectedFluidType);
+
+    const initialCumulativeProductionLabel = ref(selectedFluidType.value === 1 ? 
+    `${CumulativeOilProduction} (${liquidVolume.options[unitsRecord.value[CumulativeOilProduction].input].type})` : 
+    `${CumulativeGasProduction} (${gasVolume.options[unitsRecord.value[CumulativeGasProduction].input].type})`);
+
+    const ultimateRecoveryLabel = ref(selectedFluidType.value === 1 ? 
+      `${UltimateOilRecovery} (${liquidVolume.options[unitsRecord.value[UltimateOilRecovery].input].type})` : 
+      `${UltimateGasRecovery} (${gasVolume.options[unitsRecord.value[UltimateGasRecovery].input].type})`);
+
+    const rateDeclineRateLabel = ref(`${DeclineRate} (${declineRate.options[unitsRecord.value[UltimateGasRecovery].input].type})`);
+
+    const gasFractionDeclineRateLabel =  ref(selectedFluidType.value === 1 ? 
+      `${GORRateofChange} (${declineRate.options[unitsRecord.value[GORRateofChange].input].type})` : 
+      `${CGRRateofChange} (${declineRate.options[unitsRecord.value[CGRRateofChange].input].type})`);
+
+    const waterFractionDeclineRateLabel =  ref(selectedFluidType.value === 1 ? 
+      `${WatercutRateofChange} (${declineRate.options[unitsRecord.value[WatercutRateofChange].input].type})` : 
+      `${WGRRateofChange} (${declineRate.options[unitsRecord.value[WGRRateofChange].input].type})`);
 
     const updateInitialCumProd = (value) => {
 
@@ -214,6 +258,25 @@ export default {
       gasFractionDeclineRate.value = newVal.DCA?.gasFractionDeclineRate
       waterFractionDeclineRate.value = newVal.DCA?.waterFractionDeclineRate
 
+      selectedFluidType.value = newVal.Configure?.selectedFluidType;
+      initialCumulativeProductionLabel.value = selectedFluidType.value === 1 ? 
+      `${CumulativeOilProduction} (${liquidVolume.options[unitsRecord.value[CumulativeOilProduction].input].type})` : 
+      `${CumulativeGasProduction} (${gasVolume.options[unitsRecord.value[CumulativeGasProduction].input].type})`;
+
+      ultimateRecoveryLabel.value = selectedFluidType.value === 1 ? 
+      `${UltimateOilRecovery} (${liquidVolume.options[unitsRecord.value[UltimateOilRecovery].input].type})` : 
+      `${UltimateGasRecovery} (${gasVolume.options[unitsRecord.value[UltimateGasRecovery].input].type})`;
+
+      rateDeclineRateLabel.value = `${DeclineRate} (${declineRate.options[unitsRecord.value[UltimateGasRecovery].input].type})`;
+
+      gasFractionDeclineRateLabel.value =  selectedFluidType.value === 1 ? 
+      `${GORRateofChange} (${declineRate.options[unitsRecord.value[GORRateofChange].input].type})` : 
+      `${CGRRateofChange} (${declineRate.options[unitsRecord.value[CGRRateofChange].input].type})`;
+
+      waterFractionDeclineRateLabel.value =  selectedFluidType.value === 1 ? 
+      `${WatercutRateofChange} (${declineRate.options[unitsRecord.value[WatercutRateofChange].input].type})` : 
+      `${WGRRateofChange} (${declineRate.options[unitsRecord.value[WGRRateofChange].input].type})`;
+
     }, { deep: true, immediate: true })
 
     return {
@@ -231,7 +294,12 @@ export default {
       updateSelectedDeclineMethod,
       updateRateDeclineRate,
       updateGasFractionDeclineRate,
-      updateWaterFractionDeclineRate
+      updateWaterFractionDeclineRate,
+      initialCumulativeProductionLabel,
+      ultimateRecoveryLabel,
+      gasFractionDeclineRateLabel,
+      waterFractionDeclineRateLabel,
+      rateDeclineRateLabel
     }
   }
 }

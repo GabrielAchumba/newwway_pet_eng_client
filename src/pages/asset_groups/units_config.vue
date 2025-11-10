@@ -8,9 +8,8 @@
 </template>
 
 <script>
-import { defineComponent, ref } from 'vue';
+import { defineComponent, ref, watch } from 'vue';
 import Table from '../../components/tables/TableEditable5.vue';
-import { unitNames } from '../../units_quantities/unitNames';
 
 export default defineComponent({
   name: 'UnitsConfig',
@@ -18,6 +17,10 @@ export default defineComponent({
     Table
   },
   props: {
+    rows: {
+      type: Array,
+      default: () => []
+    }
   },
   emits: ['updateEditableTable'],
   setup(props, { emit }) {
@@ -56,30 +59,22 @@ export default defineComponent({
         },
     ]);
 
-    const rows = ref(unitNames.map((row, idx)=> {
-            return {
-                id: idx,
-                unitName: row.unitName,
-                input: 0,
-                output: 0,
-                columsOptions:{
-                    input: row.inputOptions,
-                    output: row.outputOptions,
-                },
-                quantity: row.quantity,
-                unitId: 0
-            }
-        }));
+    const rows = ref([...props.rows]);
+    console.log("rows: ", rows)
 
     const updateEditableTable = (payload) => {
-      console.log("payload: ", payload)
-      emit('updateEditableTable', payload);
+      console.log("payload.value: ", payload.value)
+      rows.value = [...payload.value];
+      emit('updateEditableTable', payload.value);
     };
 
-    // watch(() => props.activeDrainagePoint, (newVal) => {
+    watch(() => props.rows, (newVal) => {
       
-    //   rows.value = newVal.Schedule
-    // }, { deep: true, immediate: true })
+      if(newVal){
+        rows.value = [...newVal];
+      }
+
+    }, { deep: true, immediate: true })
 
     return {
         columns,

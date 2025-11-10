@@ -76,7 +76,7 @@ const menuItems = [
   {name: 'Production Network', icon: 'share', route: '/'},
   {name: 'Reservoir Analysis', icon: 'bar_chart', route: '/'},
   {name: 'Well Modeling', icon: 'track_changes', route: '/'},
-  {name: 'Business Forecast', icon: 'work', route: '/'},
+  {name: 'Business Forecast', icon: 'work', route: '/business-forecasts'},
   {name: 'Settings', icon: 'settings', route: '/'}
 ]
 

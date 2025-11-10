@@ -1,24 +1,54 @@
+import {
+    InitialGOR,
+    InitialCGR,
+    AbandonmentGOR,
+    AbandonmentCGR,
+    InitialBSW,
+    InitialWGR,
+    AbandonmentBSW,
+    AbandonmentWGR,
+    InitialOilRate,
+    InitialGasRate,
+    AbandonmentOilRate,
+    AbandonmentGasRate,
+    MaximumDrawdown,
+    MinimumPwf,
+} from "../units_quantities/unitNames";
+
+
 export const constraintConditions = [
-                'Initial GOR/CGR',
-                'Abandonment GOR/CGR', 
-                'Initial BSW/WGR',
-                'Abandonment BSW/WGR',
-                'Initial Oil/Gas Rate',
-                'Abandonment Oil/Gas Rate',
-                'Maximum Drawdown',
-                'Minimum Pwf'
+                InitialGOR,
+                InitialCGR, 
+                AbandonmentGOR,
+                AbandonmentCGR,
+                InitialBSW,
+                InitialWGR,
+                AbandonmentBSW,
+                AbandonmentWGR,
+                InitialOilRate,
+                InitialGasRate,
+                AbandonmentOilRate,
+                AbandonmentGasRate,
+                MaximumDrawdown,
+                MinimumPwf
             ];
 
 export const constraintUnits = [
-                'scf/stb | stb/MMscf',
-                'scf/stb | stb/MMscf',
-                'percent',
-                'percent',
-                'stb/d | MMscf/d',
-                'stb/d | MMscf/d',
-                'psia',
-                'psia',
-            ];
+                0,
+                0, 
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0
+    ];
 
 
 export const INITIALDRAINAGEPOINT = {
@@ -61,7 +91,7 @@ export const INITIALDRAINAGEPOINT = {
                 abandonmentCondtion: constraintCondition,
                 abandonmentValue: null,
                 abandonmentUnit: constraintUnits[idx],
-                constraintId: null
+                constraintId: null,
             }
         }),
         Schedule: Array(50).fill().map((_, idx)=> {

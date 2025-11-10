@@ -209,6 +209,7 @@ export default {
         if (rowIndex !== -1) {
             rows.value[rowIndex][column.name] = value;
             
+            console.log("rows.value: ", rows.value)
             emit('updateEditableTable', {
                 value: rows.value
             });

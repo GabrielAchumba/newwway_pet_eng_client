@@ -32,10 +32,12 @@
               :applicationColumns="applicationColumns"
               :worksheetColumns="worksheetColumns"
               :dataTypes="dataTypes"
+              :dataUnits="dataUnits"
               :worksheetQSelects="form.qSelects"
               @onApplicationColumnChanged="onApplicationColumnChanged($event)"
               @onWorksheetColumnChanged="onWorksheetColumnChanged($event)"
               @onDataTypeChanged="onDataTypeChanged($event)"
+              @onDataUnitChanged="onDataUnitChanged($event)"
               @onToggle="onToggle($event)"
               @onFileSelected="onFileSelected($event)"
               @onQSelectItemValueChanged="onWorksheetChanged($event)"
@@ -115,6 +117,7 @@ import { importMethodForm, dialogs } from "./import-method-view-model";
 import ReadWorksheet from "./read-worksheet.vue";
 import MapVariables from "./mapVariablesNew.vue";
 import Table from "../../tables/Table.vue";
+import { unitNamesRecord } from "../../../units_quantities/unitNames";
 
 const authStore = useAuthStore();
 
@@ -176,6 +179,7 @@ export default {
             visibile: true,
             selectedWorkSheetData: {},
             dataTypes: [],
+            dataUnits: [],
             worksheetColumns: [],
             form: form,
             tableVM: {
@@ -192,6 +196,7 @@ export default {
                 updateItemUrl: "/update-staff",
                 importURL: "/import-staff", */
             },
+            tableColumnUnits: [],
             selectedFile: null,
             importMethodForm: importMethodForm,
             dialogs: dialogs,
@@ -220,6 +225,11 @@ export default {
         onDataTypeChanged(qSelect){
             var context = this;
             context.dataTypes[qSelect.sn].value = qSelect.value.value;
+        },
+        onDataUnitChanged(qSelect){
+            var context = this;
+            context.dataUnits[qSelect.sn].value = qSelect.value.value;
+            //console.log("context.dataUnits: ", context.dataUnits)
         },
         onToggle(payload){
             var context = this;
@@ -252,13 +262,17 @@ export default {
         },
         saveTable(){
             var context = this;
-            this.$emit("saveTable", context.tableVM.rows);
+            this.$emit("saveTable", {
+                tableRows: context.tableVM.rows,
+                tableColumnUnits: context.tableColumnUnits
+            });
         },
         setTableData(){
             var context = this;
             context.tableVM.rows = [];
             console.log("context.selectedWorkSheetData: ", context.selectedWorkSheetData)
             console.log("context.tableVM.columnsOriginal: ", context.tableVM.columnsOriginal)
+            //context.dataUnits[qSelect.sn].value
             let ii = -1;
             for(const selectedWorkSheetRow of context.selectedWorkSheetData){
                 ii++;
@@ -275,14 +289,66 @@ export default {
                 
             }
 
+            debugger;
+
             console.log("context.tableVM.rows: ", context.tableVM.rows)
+            
             if(context.tableVM.rows.length > 0){
+
+                const dataUnitsRecords = context.dataUnits.reduce((acc, dataUnitsRecord) => {
+                              acc[dataUnitsRecord.columName] = {
+                                  id: dataUnitsRecord.id,
+                                  value: dataUnitsRecord.value,
+                                  sn: dataUnitsRecord.sn,
+                                  columName: dataUnitsRecord.columName
+                              };
+                              return acc;
+                            }, {});
+                
                 const keys = Object.keys(context.tableVM.rows[0]);
+
+                
+                const tableColumnUnitsObj = {};
                 context.tableVM.columns = keys.map((row) => {
-                    return { name: `${row}`, label: `${row.toUpperCase()}`, field: "", align: "left", type: "" }
+
+                    const unitNameRecord = unitNamesRecord[row];
+                    
+                    const foundUnitOption = unitNameRecord.inputOptions.find(e => e.label == dataUnitsRecords[row].value); 
+
+                    tableColumnUnitsObj[row] = {
+                        unitName: row,
+                        input: foundUnitOption?.id,
+                        output: foundUnitOption?.id,
+                        quantity: unitNameRecord?.quantity,
+                    };
+
+                    const _foundUnitOptionLabel = foundUnitOption?.label === 'No Unit' ? "" : `(${foundUnitOption?.label})`
+
+                    return { name: `${row}`, label: `${row.toUpperCase()} ${_foundUnitOptionLabel}`, field: "", align: "left", type: "" }
                 })
+
+                const unitVariableNames = Object.keys(unitNamesRecord);
+                //context.tableColumnUnits = [];
+                context.tableColumnUnits = unitVariableNames.map((row) => {
+
+                        const tableColumnUnit = tableColumnUnitsObj[row];
+                        if(tableColumnUnit){
+                            return {
+                                ...tableColumnUnit
+                            }
+                        }else{
+                            const obj = unitNamesRecord[row];
+                            return {
+                                unitName: row,
+                                input: obj.inputOptions[0].id,
+                                output: obj.inputOptions[0].id,
+                                quantity: obj.quantity,
+                            }
+                        }
+                    })
                 
                 console.log("tableVM: ", context.tableVM)
+                console.log("tableColumnUnits: ", context.tableColumnUnits)
                 authStore.setStateData("newRows", context.tableVM.rows);
             }
 
@@ -382,6 +448,39 @@ export default {
             }
 
             console.log("context.dataTypes: ", context.dataTypes)
+        },
+        setDataUnits(){
+            var context = this;
+
+            const nRows = context._applicationColumns.length;
+            for(let i = 0; i < nRows; i++){
+  
+                let qSelect = { 
+                    label: "", 
+                    value: "", 
+                    type: "text", 
+                    list: context._applicationColumns[i].unitOptions.map((row) => {
+                        return {
+                            type: row.label,
+                            value: row.label,
+                            label: row.label,
+                        }
+                    }), 
+                    actionName: "referedByAction", 
+                    visible: true,
+                    isToggle: false,
+                    qToggle: { name: true, label: ""} 
+                }
+
+
+                context.dataUnits.push({...qSelect})
+                context.dataUnits[i].id = `Data Unit ${i+1}`;
+                context.dataUnits[i].value =  context.dataUnits[i].list[0].value;
+                context.dataUnits[i].sn = i;
+                context.dataUnits[i].columName = context._applicationColumns[i].value;
+            }
+
+            console.log("context.dataUnits: ", context.dataUnits)
         },
         dialogFailureOrScuess(dialogTitle, isVisible){
           const context = this;
@@ -725,8 +824,17 @@ export default {
         })
 
         context.tableVM.columnsOriginal = context.applicationColumns.map((row) => {
-                    return { data: {...row}, name: `${row.value}`, label: `${row.value.toUpperCase()}`, field: "", align: "left", type: "" }
+                    return { 
+                        data: {...row}, 
+                        name: `${row.value}`, 
+                        label: `${row.value.toUpperCase()}`, 
+                        field: "", 
+                        align: "left", 
+                        type: "" 
+                    }
         })
+
+        context.setDataUnits();
 
         const methods = ["Method 1", "Method 2"]
         context.importMethodForm.qSelects[0].list = methods.map((row, i) => {

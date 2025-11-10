@@ -1,11 +1,11 @@
 export const glr = {
 
-    "STB/MMScf": {multiplier: 1, shift: 0, name: "STB/MMScf"},
-    "Sm3/Sm3": {multiplier: 5.6433e-006, shift: 0, name: "Sm3/Sm3"},
-    "m3/m3": {multiplier: 5.6433e-006, shift: 0, name: "m3/m3"},
-    "STB/Mscf": {multiplier: 0.001, shift: 0, name: "STB/Mscf"},
-    "STB/scf": {multiplier: 0.000001, shift: 0, name: "STB/Mscf"},
-    "Sm3/KSm3": {multiplier: 0.0056433, shift: 0, name: "Sm3/KSm3"},
+    "scf/STB": {multiplier: 1, shift: 0, name: "scf/STB"},
+    "Sm3/Sm3": {multiplier: 0.1772, shift: 0, name: "Sm3/Sm3"},
+    "m3/m3": {multiplier: 0.1772, shift: 0, name: "m3/m3"},
+    "Mscf/STB": {multiplier: 0.001, shift: 0, name: "Mscf/STB"},
+    "MMscf/STB": {multiplier: 0.000001, shift: 0, name: "MMscf/STB"},
+    "KSm3/Sm3": {multiplier: 0.0001772, shift: 0, name: "KSm3/Sm3"},
     
     convertToBase: (fromUnit, userValue) => {
 
@@ -26,7 +26,7 @@ export const glr = {
     },
     options: [
         {
-            id: 0, type: "STB/MMScf", label: "STB/MMScf"
+            id: 0, type: "scf/STB", label: "scf/STB"
         },
         {
             id: 1, type: "Sm3/Sm3", label: "Sm3/Sm3"
@@ -35,13 +35,13 @@ export const glr = {
             id: 2, type: "m3/m3", label: "m3/m3"
         },
         {
-            id: 3, type: "STB/Mscf", label: "STB/Mscf"
+            id: 3, type: "Mscf/STB", label: "Mscf/STB"
         },
         {
-            id: 4, type: "STB/Mscf", label: "STB/Mscf"
+            id: 4, type: "MMscf/STB", label: "MMscf/STB"
         },
         {
-            id: 5, type: "Sm3/KSm3", label: "Sm3/KSm3"
+            id: 5, type: "KSm3/Sm3", label: "KSm3/Sm3"
         }
     ]
 }

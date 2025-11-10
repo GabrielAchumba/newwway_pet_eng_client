@@ -52,6 +52,10 @@ import { useAssetGroupsStore } from 'src/store/modules/assetGroupsStore';
 import { useRouter } from 'vue-router'
 import { createBulkConstraints } from "src/api_services/drainage_point_input";
 import { constraintConditions , constraintUnits } from "src/constants/initial_assets";
+import {
+    DrainagePoint,
+    unitNamesRecord,
+} from "../../../units_quantities/unitNames";
 
 const authStore = useAuthStore();
 const router = useRouter();
@@ -98,18 +102,23 @@ export default {
         }
     },
     methods:{
-        Create(tableRows){
+        Create(payload){
             const context = this;
-            context.tableRows = tableRows;
+            context.tableRows = payload.tableRows;
+            context.tableColumnUnits = payload.tableColumnUnits;
 
             console.log(context.assetGroups);
             console.log(context.selectedAssetGroup);
-             console.log(tableRows);
+            console.log(payload.tableRows);
+            console.log(payload.tableColumnUnits);
+            
+            context.payload = {
+                tableColumnUnits: [...payload.tableColumnUnits],
+                constraints: []
+            };
 
-             context.payload = [];
-
-            for (const row of tableRows) {
-                const existingDP = context.drainagePoints.find(e => e.label === row["Drainage Point"]);
+            for (const row of payload.tableRows) {
+                const existingDP = context.drainagePoints.find(e => e.label === row[DrainagePoint]);
                 
                 if (!existingDP) continue;
 
@@ -117,7 +126,8 @@ export default {
                 constraintConditions.forEach((constraintCondition, idx) => {
                     const value = row[constraintCondition];
                     
-                    context.payload.push({
+                    
+                    context.payload.constraints.push({
                         AssetGroupId: assetGroupsStore.selectedAssetGroup.id,
                         abandonmentCondtion: constraintCondition,
                         abandonmentValue: value || null,
@@ -126,6 +136,8 @@ export default {
                     });
                 });
             }
+
+            console.log("context.payload: ", context.payload)
 
             var i = -1;
             for(const dialog of context.dialogs){
@@ -165,12 +177,18 @@ export default {
                     variableName:row.name,
                 }
             })
+          
+            const applicationColumnsTemp = [];
+            console.log("unitNamesRecord: ", unitNamesRecord)
             for(let i = 0; i < context.appVariables.length; i++){
-                context.applicationColumns.push({...qSelect})
-                context.applicationColumns[i].id = `Application Column ${i+1}`;
-                context.applicationColumns[i].value =  context.applicationColumns[i].list[i].value;
-                context.applicationColumns[i].sn = i;
+                applicationColumnsTemp.push({...qSelect})
+                applicationColumnsTemp[i].id = `Application Column ${i+1}`;
+                applicationColumnsTemp[i].value =  applicationColumnsTemp[i].list[i].value;
+                applicationColumnsTemp[i].sn = i;
+                applicationColumnsTemp[i].unitOptions = unitNamesRecord[context.appVariables[i].name].inputOptions;
             }
+
+            context.applicationColumns = [...applicationColumnsTemp];
             console.log("context.applicationColumns: ", context.applicationColumns)
         },
         async storeDpConstraints() {
